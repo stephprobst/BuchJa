@@ -1,0 +1,20 @@
+- Export into dedicated tab
+- Sketch into dedicated tab
+- Add file rename button in image management tab
+- When generating images, add character sheets automatically to references and pages to pages. Crops should also be added to references.
+- Sketch save button easier to see
+- Add Donation setup
+- Think about process to add text
+- Sketch canvas to resize
+- Inspect the project.json file, how it is created, what is saved in it / how to start a new project.
+- Shift header text to the left
+- Allow editing of system prompts
+- Make settings auto-saved or easier to see save button
+- Make ready for Mac and Linux
+- End to end test
+- Clean up code
+- Rework Instructions
+- Final Check for licenses
+- Go through project metadata / author / license
+- Add disclaimer to Readme
+- Add Readme

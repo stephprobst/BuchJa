@@ -1,0 +1,58 @@
+# Build Configuration for Book Creator
+# Uses nicegui-pack for bundling NiceGUI apps into Windows executables
+
+[build]
+# Main entry point
+script = "src/main.py"
+
+# Application name
+name = "BookCreator"
+
+# Include these data files/folders
+data = [
+    "src/components/*.vue",
+]
+
+# Hidden imports that PyInstaller might miss
+hidden_imports = [
+    "nicegui",
+    "webview",
+    "PIL",
+    "reportlab",
+    "keyring.backends.Windows",
+    "google.genai",
+]
+
+# Exclude these modules to reduce size
+excludes = [
+    "tkinter",
+    "matplotlib",
+    "numpy",
+    "scipy",
+]
+
+# One-file vs one-folder mode
+onefile = false
+
+# Console mode (false for GUI app)
+console = false
+
+# Icon file (optional)
+# icon = "assets/icon.ico"
+
+# Windows-specific options
+[build.windows]
+# Company name for version info
+company_name = "Book Creator"
+
+# Product name
+product_name = "Book Creator"
+
+# File description  
+file_description = "AI-powered book creation application"
+
+# Version string
+version = "1.0.0"
+
+# Copyright
+copyright = "2024"

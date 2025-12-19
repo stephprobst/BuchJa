@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "book-creator"
+version = "0.1.0"
+description = "Create illustrated books with AI image generation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Book Creator Team" }]
+dependencies = [
+    "nicegui[native]>=2.0.0",
+    "google-genai>=1.0.0",
+    "pillow>=10.0.0",
+    "keyring>=25.0.0",
+    "reportlab>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.0.0",
+]
+bundle = ["pyinstaller>=6.0.0"]
+
+[project.scripts]
+book-creator = "src.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-v --tb=short"
+main_file = "src/main.py"
+markers = [
+    "unit: Unit tests (fast, mocked)",
+    "integration: Integration tests (NiceGUI User simulation)",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
