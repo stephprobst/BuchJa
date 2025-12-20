@@ -13,14 +13,16 @@ class TestTabNavigation:
     """Tests for the vertical tab navigation system."""
 
     async def test_all_tabs_exist(self, user: User):
-        """Test that all five main tabs are visible."""
+        """Test that all main tabs are visible."""
         await user.open('/')
         
         await user.should_see('Settings')
         await user.should_see('Add')
         await user.should_see('Crop')
+        await user.should_see('Sketch')
         await user.should_see('Generate')
         await user.should_see('Manage')
+        await user.should_see('Export')
 
     async def test_settings_tab_is_default(self, user: User):
         """Test that Settings tab is shown by default."""
@@ -144,13 +146,20 @@ class TestGenerateTabUI:
         # Should see prompt label
         await user.should_see('Prompt')
 
-    async def test_sketch_expansion_exists(self, user: User):
-        """Test that sketch expansion panel exists."""
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+class TestSketchTabUI:
+    """Tests for the Sketch tab user interface."""
+
+    async def test_sketch_tab_content(self, user: User):
+        """Test that sketch tab contains canvas and controls."""
         await user.open('/')
-        await user.should_see('Generate')
-        user.find(content='Generate').click()
+        await user.should_see('Sketch')
+        user.find(content='Sketch').click()
         
-        await user.should_see('Add a sketch')
+        await user.should_see('Sketching Canvas')
+        await user.should_see('Sketch Name')
 
 
 @pytest.mark.integration

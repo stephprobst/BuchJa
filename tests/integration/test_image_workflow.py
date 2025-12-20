@@ -187,18 +187,28 @@ class TestSketchUploadWorkflow:
         user.find(content='Add').click()
         await user.should_see('Upload Reference Images')
 
+    async def test_sketch_tab_exists(
+        self, user: User, mock_settings_with_key, mock_image_service
+    ):
+        """Test that sketch tab exists."""
+        await user.open('/')
+        await user.should_see('Sketch')
+        user.find(content='Sketch').click()
+        await user.should_see('Sketching Canvas')
+
     async def test_sketch_canvas_exists(
         self, user: User, mock_settings_with_key, mock_image_service
     ):
         """Test that sketch canvas component exists."""
         await user.open('/')
         
-        # Navigate to Generate tab where sketch canvas is
-        await user.should_see('Generate')
-        user.find(content='Generate').click()
+        # Navigate to Sketch tab
+        await user.should_see('Sketch')
+        user.find(content='Sketch').click()
         
         # Look for sketch-related elements
-        await user.should_see('Add a sketch')
+        await user.should_see('Sketching Canvas')
+        await user.should_see('Sketch Name')
 
 
 @pytest.mark.integration
