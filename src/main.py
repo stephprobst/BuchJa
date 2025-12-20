@@ -359,6 +359,12 @@ def build_settings_tab():
                         APP.settings.working_folder = folder_path
                         APP.ensure_logging()
                         folder_label.text = str(folder_path)
+                        
+                        # Re-initialize services with new folder and restart folder watcher
+                        init_image_service()
+                        start_folder_watcher()
+                        APP.trigger_refresh()
+                        
                         ui.notify(f'Working folder set to: {folder_path}', type='positive')
                 
                 ui.button('Browse...', on_click=pick_folder).props('outline')
@@ -1188,6 +1194,7 @@ def build_manage_tab():
                         )
             
             init_manager()
+            APP.register_refresh_callback(init_manager)
             with ui.row().classes('gap-2'):
                 ui.button('Refresh', on_click=init_manager, icon='refresh').props('outline')
                 ui.button('OPEN IN FILE EXPLORER', on_click=lambda: APP.image_manager.open_current_folder() if APP.image_manager else None, icon='folder_open').props('outline')
