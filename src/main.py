@@ -146,7 +146,13 @@ def init_image_service():
                     cost=getattr(usage, 'cost', None),
                 )
 
-            APP.image_service = ImageService(api_key, working_folder, usage_callback=record_usage)
+            system_prompt_overrides = APP.settings.get_all_system_prompt_overrides()
+            APP.image_service = ImageService(
+                api_key, 
+                working_folder, 
+                usage_callback=record_usage,
+                system_prompt_overrides=system_prompt_overrides,
+            )
             APP.project_manager = ProjectManager(working_folder)
             logger.info("Image service initialized")
             return True
@@ -376,7 +382,7 @@ def build_settings_tab():
                 aspect_select = ui.select(
                     ASPECT_RATIOS,
                     value=APP.settings.aspect_ratio if APP.settings else '3:4',
-                    label='Page Aspect Ratio'
+                    label='Page Aspect Ratio (width:height)'
                 ).classes('w-48')
                 aspect_select._props['marker'] = 'aspect-ratio-select'
             
@@ -396,6 +402,62 @@ def build_settings_tab():
                 ).classes('w-full').props('outlined rows=4')
                 style_textarea._props['marker'] = 'style-prompt-input'
             
+            # System Prompt Overrides (project-specific)
+            with ui.card().classes('w-full'):
+                ui.label('System Prompt Overrides').classes('text-lg font-bold')
+                ui.label(
+                    'Override default system prompts for this project. '
+                    'Leave empty to use defaults from ai_config.json.'
+                ).classes('text-gray-600 text-sm mb-2')
+                
+                with ui.expansion('Character Sheet Prompt', icon='person').classes('w-full'):
+                    default_char = SYSTEM_PROMPTS.get('character_sheet', '')
+                    current_char = APP.settings.get_system_prompt_override('character_sheet') if APP.settings else None
+                    ui.label('Default:').classes('text-xs text-gray-500 mt-2')
+                    ui.label(default_char).classes('text-xs text-gray-400 italic mb-2 whitespace-pre-wrap select-text cursor-text')
+                    char_sheet_textarea = ui.textarea(
+                        'Custom Override (leave empty to use default)',
+                        value=current_char or '',
+                        placeholder=default_char,
+                    ).classes('w-full').props('outlined rows=4')
+                    char_sheet_textarea._props['marker'] = 'char-sheet-prompt-input'
+                
+                with ui.expansion('Page Prompt', icon='image').classes('w-full'):
+                    default_page = SYSTEM_PROMPTS.get('page', '')
+                    current_page = APP.settings.get_system_prompt_override('page') if APP.settings else None
+                    ui.label('Default:').classes('text-xs text-gray-500 mt-2')
+                    ui.label(default_page).classes('text-xs text-gray-400 italic mb-2 whitespace-pre-wrap select-text cursor-text')
+                    page_textarea = ui.textarea(
+                        'Custom Override (leave empty to use default)',
+                        value=current_page or '',
+                        placeholder=default_page,
+                    ).classes('w-full').props('outlined rows=4')
+                    page_textarea._props['marker'] = 'page-prompt-input'
+                
+                with ui.expansion('Rework Character Prompt', icon='edit').classes('w-full'):
+                    default_rework_char = SYSTEM_PROMPTS.get('rework_character', '')
+                    current_rework_char = APP.settings.get_system_prompt_override('rework_character') if APP.settings else None
+                    ui.label('Default:').classes('text-xs text-gray-500 mt-2')
+                    ui.label(default_rework_char).classes('text-xs text-gray-400 italic mb-2 whitespace-pre-wrap select-text cursor-text')
+                    rework_char_textarea = ui.textarea(
+                        'Custom Override (leave empty to use default)',
+                        value=current_rework_char or '',
+                        placeholder=default_rework_char,
+                    ).classes('w-full').props('outlined rows=4')
+                    rework_char_textarea._props['marker'] = 'rework-char-prompt-input'
+                
+                with ui.expansion('Rework Page Prompt', icon='auto_fix_high').classes('w-full'):
+                    default_rework_page = SYSTEM_PROMPTS.get('rework_page', '')
+                    current_rework_page = APP.settings.get_system_prompt_override('rework_page') if APP.settings else None
+                    ui.label('Default:').classes('text-xs text-gray-500 mt-2')
+                    ui.label(default_rework_page).classes('text-xs text-gray-400 italic mb-2 whitespace-pre-wrap select-text cursor-text')
+                    rework_page_textarea = ui.textarea(
+                        'Custom Override (leave empty to use default)',
+                        value=current_rework_page or '',
+                        placeholder=default_rework_page,
+                    ).classes('w-full').props('outlined rows=4')
+                    rework_page_textarea._props['marker'] = 'rework-page-prompt-input'
+            
         def check_dirty() -> bool:
             if not APP.settings:
                 return False
@@ -411,6 +473,17 @@ def build_settings_tab():
             # Style Prompt
             if style_textarea.value != APP.settings.style_prompt:
                 return True
+            
+            # System Prompt Overrides
+            for key, textarea in [
+                ('character_sheet', char_sheet_textarea),
+                ('page', page_textarea),
+                ('rework_character', rework_char_textarea),
+                ('rework_page', rework_page_textarea),
+            ]:
+                current_override = APP.settings.get_system_prompt_override(key) or ''
+                if textarea.value != current_override:
+                    return True
                 
             return False
 
@@ -425,6 +498,22 @@ def build_settings_tab():
                 
                 APP.settings.aspect_ratio = aspect_select.value
                 APP.settings.style_prompt = style_textarea.value
+                
+                # Save system prompt overrides
+                for key, textarea in [
+                    ('character_sheet', char_sheet_textarea),
+                    ('page', page_textarea),
+                    ('rework_character', rework_char_textarea),
+                    ('rework_page', rework_page_textarea),
+                ]:
+                    APP.settings.set_system_prompt_override(key, textarea.value)
+                
+                # Update image service with new overrides
+                if APP.image_service:
+                    APP.image_service.set_system_prompt_overrides(
+                        APP.settings.get_all_system_prompt_overrides()
+                    )
+                
                 APP.ensure_logging()
                 
                 if init_image_service():
@@ -987,7 +1076,15 @@ def build_generate_tab():
             if mode_switch.value:
                 system_key = "rework_page" if gen_type == 'Page' else "rework_character"
             
-            prompt_text = SYSTEM_PROMPTS.get(system_key, "No system prompt found.")
+            # Check for project-specific override first, then fall back to default
+            if APP.settings:
+                override = APP.settings.get_system_prompt_override(system_key)
+                if override:
+                    prompt_text = override
+                else:
+                    prompt_text = SYSTEM_PROMPTS.get(system_key, "No system prompt found.")
+            else:
+                prompt_text = SYSTEM_PROMPTS.get(system_key, "No system prompt found.")
             
             # Add style prompt to display
             if APP.settings and APP.settings.style_prompt:

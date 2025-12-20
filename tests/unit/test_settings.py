@@ -257,3 +257,97 @@ class TestSettingsApiKey:
         settings = Settings(config_path)
         
         assert settings.is_configured() is False
+
+
+@pytest.mark.unit
+class TestSystemPromptOverrides:
+    """Tests for system prompt override functionality."""
+
+    def test_get_override_returns_none_when_not_set(self, config_path: Path, temp_dir: Path):
+        """Test that get_system_prompt_override returns None when no override is set."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        assert settings.get_system_prompt_override('character_sheet') is None
+        assert settings.get_system_prompt_override('page') is None
+
+    def test_set_and_get_override(self, config_path: Path, temp_dir: Path):
+        """Test setting and getting a system prompt override."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        settings.set_system_prompt_override('character_sheet', 'Custom character prompt')
+        
+        assert settings.get_system_prompt_override('character_sheet') == 'Custom character prompt'
+        assert settings.get_system_prompt_override('page') is None
+
+    def test_set_override_persists_to_project_json(self, config_path: Path, temp_dir: Path):
+        """Test that overrides are persisted to project.json."""
+        settings = Settings(config_path)
+        project_dir = temp_dir / "project"
+        settings.working_folder = project_dir
+        
+        settings.set_system_prompt_override('page', 'Custom page prompt')
+        
+        # Reload settings and check override persisted
+        settings2 = Settings(config_path)
+        settings2._load_project_config()
+        assert settings2.get_system_prompt_override('page') == 'Custom page prompt'
+
+    def test_clear_override_with_empty_string(self, config_path: Path, temp_dir: Path):
+        """Test that setting empty string clears the override."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        settings.set_system_prompt_override('character_sheet', 'Custom prompt')
+        assert settings.get_system_prompt_override('character_sheet') == 'Custom prompt'
+        
+        settings.set_system_prompt_override('character_sheet', '')
+        assert settings.get_system_prompt_override('character_sheet') is None
+
+    def test_clear_override_with_none(self, config_path: Path, temp_dir: Path):
+        """Test that setting None clears the override."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        settings.set_system_prompt_override('page', 'Custom prompt')
+        settings.set_system_prompt_override('page', None)
+        
+        assert settings.get_system_prompt_override('page') is None
+
+    def test_get_all_overrides(self, config_path: Path, temp_dir: Path):
+        """Test getting all system prompt overrides."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        settings.set_system_prompt_override('character_sheet', 'Char prompt')
+        settings.set_system_prompt_override('page', 'Page prompt')
+        
+        all_overrides = settings.get_all_system_prompt_overrides()
+        
+        assert all_overrides == {
+            'character_sheet': 'Char prompt',
+            'page': 'Page prompt',
+        }
+
+    def test_clear_all_overrides(self, config_path: Path, temp_dir: Path):
+        """Test clearing all system prompt overrides."""
+        settings = Settings(config_path)
+        settings.working_folder = temp_dir / "project"
+        
+        settings.set_system_prompt_override('character_sheet', 'Char prompt')
+        settings.set_system_prompt_override('page', 'Page prompt')
+        
+        settings.clear_system_prompt_overrides()
+        
+        assert settings.get_all_system_prompt_overrides() == {}
+        assert settings.get_system_prompt_override('character_sheet') is None
+        assert settings.get_system_prompt_override('page') is None
+
+    def test_override_without_working_folder_is_noop(self, config_path: Path):
+        """Test that setting override without working folder does nothing."""
+        settings = Settings(config_path)
+        
+        settings.set_system_prompt_override('character_sheet', 'Custom prompt')
+        
+        assert settings.get_system_prompt_override('character_sheet') is None

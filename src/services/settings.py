@@ -281,6 +281,68 @@ class Settings:
             self._config["temperature"] = value
             self._save_config()
 
+    # --- System Prompt Overrides ---
+
+    def get_system_prompt_override(self, key: str) -> Optional[str]:
+        """Get a project-specific system prompt override.
+        
+        Args:
+            key: The system prompt key (e.g., "character_sheet", "page").
+        
+        Returns:
+            The override prompt if set, or None to use default.
+        """
+        overrides = self._project_config.get("system_prompt_overrides", {})
+        if isinstance(overrides, dict):
+            value = overrides.get(key)
+            if isinstance(value, str):
+                return value
+        return None
+
+    def set_system_prompt_override(self, key: str, prompt: Optional[str]) -> None:
+        """Set a project-specific system prompt override.
+        
+        Args:
+            key: The system prompt key (e.g., "character_sheet", "page").
+            prompt: The override prompt, or None/empty to clear the override.
+        """
+        if not self.working_folder:
+            return
+        
+        if "system_prompt_overrides" not in self._project_config:
+            self._project_config["system_prompt_overrides"] = {}
+        
+        if prompt and prompt.strip():
+            self._project_config["system_prompt_overrides"][key] = prompt.strip()
+        else:
+            # Remove override if empty
+            self._project_config["system_prompt_overrides"].pop(key, None)
+            # Clean up empty dict
+            if not self._project_config["system_prompt_overrides"]:
+                del self._project_config["system_prompt_overrides"]
+        
+        self._save_project_config()
+
+    def get_all_system_prompt_overrides(self) -> dict[str, str]:
+        """Get all project-specific system prompt overrides.
+        
+        Returns:
+            Dictionary of key -> override prompt.
+        """
+        overrides = self._project_config.get("system_prompt_overrides", {})
+        if isinstance(overrides, dict):
+            return {k: v for k, v in overrides.items() if isinstance(v, str)}
+        return {}
+
+    def clear_system_prompt_overrides(self) -> None:
+        """Clear all system prompt overrides for this project."""
+        if not self.working_folder:
+            return
+        
+        if "system_prompt_overrides" in self._project_config:
+            del self._project_config["system_prompt_overrides"]
+            self._save_project_config()
+
     # --- Utility Methods ---
 
     def get_subfolder(self, name: str) -> Optional[Path]:

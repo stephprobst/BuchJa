@@ -51,18 +51,43 @@ class ImageService:
         api_key: str,
         working_folder: Path,
         usage_callback: Optional[Callable[[GeminiUsage], None]] = None,
+        system_prompt_overrides: Optional[dict[str, str]] = None,
     ):
         """Initialize the image service.
         
         Args:
             api_key: Gemini API key.
             working_folder: Base folder for storing generated images.
+            usage_callback: Optional callback for usage tracking.
+            system_prompt_overrides: Optional dict of system prompt key -> override text.
         """
         self._client = genai.Client(api_key=api_key)
         self._working_folder = working_folder
         self._lock = asyncio.Lock()
         self._is_generating = False
         self._usage_callback = usage_callback
+        self._system_prompt_overrides = system_prompt_overrides or {}
+
+    def set_system_prompt_overrides(self, overrides: dict[str, str]) -> None:
+        """Update system prompt overrides.
+        
+        Args:
+            overrides: Dict of system prompt key -> override text.
+        """
+        self._system_prompt_overrides = overrides or {}
+
+    def get_system_prompt(self, key: str) -> str:
+        """Get a system prompt, checking overrides first.
+        
+        Args:
+            key: System prompt key (e.g., "character_sheet", "page").
+        
+        Returns:
+            The override if set, otherwise the default from ai_config.json.
+        """
+        if key in self._system_prompt_overrides and self._system_prompt_overrides[key]:
+            return self._system_prompt_overrides[key]
+        return SYSTEM_PROMPTS.get(key, "")
 
     @property
     def is_generating(self) -> bool:
@@ -292,7 +317,7 @@ class ImageService:
 
         system_instruction = ""
         if system_prompt_key:
-            system_instruction = SYSTEM_PROMPTS.get(system_prompt_key, "")
+            system_instruction = self.get_system_prompt(system_prompt_key)
         
         # Add style prompt to system instruction
         if style_prompt:
@@ -655,7 +680,7 @@ class ImageService:
 
         system_instruction = ""
         if system_prompt_key:
-            system_instruction = SYSTEM_PROMPTS.get(system_prompt_key, "")
+            system_instruction = self.get_system_prompt(system_prompt_key)
         
         # Add style prompt to system instruction
         if style_prompt:

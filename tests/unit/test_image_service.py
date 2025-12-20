@@ -30,6 +30,39 @@ class TestImageService:
         assert service.is_generating is False
         mock_genai.Client.assert_called_once_with(api_key="test-api-key")
 
+    def test_init_with_system_prompt_overrides(self, working_folder: Path, mock_genai):
+        """Test ImageService initialization with system prompt overrides."""
+        overrides = {'character_sheet': 'Custom character prompt'}
+        service = ImageService("test-api-key", working_folder, system_prompt_overrides=overrides)
+        
+        assert service._system_prompt_overrides == overrides
+
+    def test_get_system_prompt_returns_default(self, working_folder: Path, mock_genai):
+        """Test get_system_prompt returns default when no override."""
+        service = ImageService("test-api-key", working_folder)
+        
+        result = service.get_system_prompt('character_sheet')
+        
+        assert result == SYSTEM_PROMPTS.get('character_sheet', '')
+
+    def test_get_system_prompt_returns_override(self, working_folder: Path, mock_genai):
+        """Test get_system_prompt returns override when set."""
+        overrides = {'character_sheet': 'Custom character prompt'}
+        service = ImageService("test-api-key", working_folder, system_prompt_overrides=overrides)
+        
+        result = service.get_system_prompt('character_sheet')
+        
+        assert result == 'Custom character prompt'
+
+    def test_set_system_prompt_overrides(self, working_folder: Path, mock_genai):
+        """Test set_system_prompt_overrides updates overrides."""
+        service = ImageService("test-api-key", working_folder)
+        
+        service.set_system_prompt_overrides({'page': 'New page prompt'})
+        
+        assert service.get_system_prompt('page') == 'New page prompt'
+        assert service.get_system_prompt('character_sheet') == SYSTEM_PROMPTS.get('character_sheet', '')
+
     def test_get_mime_type(self, working_folder: Path, mock_genai):
         """Test MIME type detection for various file types."""
         service = ImageService("test-api-key", working_folder)
