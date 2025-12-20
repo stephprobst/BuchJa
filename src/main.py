@@ -1051,7 +1051,7 @@ def build_instructions_tab():
 
 
 def build_manage_tab():
-    """Build the Manage tab content for organizing images and exporting PDF."""
+    """Build the Manage tab content for organizing images."""
     with ui.column().classes('w-full gap-6 p-4'):
         # Image Manager
         with ui.card().classes('w-full'):
@@ -1076,8 +1076,12 @@ def build_manage_tab():
             with ui.row().classes('gap-2'):
                 ui.button('Refresh', on_click=init_manager, icon='refresh').props('outline')
                 ui.button('OPEN IN FILE EXPLORER', on_click=lambda: APP.image_manager.open_current_folder() if APP.image_manager else None, icon='folder_open').props('outline')
-        
-        # PDF Export
+
+
+
+def build_export_tab():
+    """Build the Export tab content for creating PDFs."""
+    with ui.column().classes('w-full gap-6 p-4'):
         with ui.card().classes('w-full'):
             ui.label('Export to PDF').classes('text-lg font-bold')
             ui.label(
@@ -1290,6 +1294,8 @@ def main_page():
                 generate_tab._props['marker'] = 'tab-generate'
                 manage_tab = ui.tab('Manage', icon='folder')
                 manage_tab._props['marker'] = 'tab-manage'
+                export_tab = ui.tab('Export', icon='picture_as_pdf')
+                export_tab._props['marker'] = 'tab-export'
         
         # Tab panels on the right (with keep-alive for state preservation)
         with ui.tab_panels(tabs, value=instructions_tab).props('keep-alive').classes('flex-1 overflow-auto'):
@@ -1310,6 +1316,9 @@ def main_page():
             
             with ui.tab_panel(manage_tab):
                 build_manage_tab()
+            
+            with ui.tab_panel(export_tab):
+                build_export_tab()
     
     # Status footer
     APP.status_footer = StatusFooter()
