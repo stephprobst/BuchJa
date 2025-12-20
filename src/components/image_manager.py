@@ -278,6 +278,13 @@ class ImageManager:
         self._container = None
         self._current_tab = 'Pages'
         
+        # Preview dialog state
+        self._preview_dialog = None
+        self._preview_image = None
+        self._preview_label = None
+        self._preview_images: list[dict] = []
+        self._preview_index: int = 0
+        
         with ui.column().classes('w-full gap-4') as self._container:
             self._build_ui()
 
@@ -424,12 +431,20 @@ class ImageManager:
             # Line 3: Actions
             with ui.row().classes('w-full justify-center gap-2 pb-2'):
                 # View full size
-                def view_image(path=image_path, name=image_name):
-                    full_path = self._working_folder / path if not Path(path).is_absolute() else Path(path)
-                    if full_path.exists():
-                        self._show_image_dialog(str(full_path), name)
+                def view_image():
+                    # Get fresh list to ensure order is correct
+                    if category == 'pages':
+                        current_images = self._project.get_ordered_pages()
                     else:
-                        ui.notify(f'Image not found: {full_path}', type='warning')
+                        current_images = self._project.get_images(category)
+                    
+                    # Find index of current image
+                    try:
+                        # We match by ID (relative path)
+                        current_index = next(i for i, img in enumerate(current_images) if img['id'] == image_id)
+                        self._show_image_dialog(current_images, current_index)
+                    except StopIteration:
+                        ui.notify('Image no longer exists', type='warning')
                 
                 ui.button(icon='visibility', on_click=view_image).props('flat dense round size=sm').tooltip('View')
                 
@@ -452,15 +467,23 @@ class ImageManager:
                 
                 ui.button(icon='delete', on_click=delete).props('flat dense round size=sm color=negative').tooltip('Delete')
 
-    def _show_image_dialog(self, image_path: str, image_name: str) -> None:
-        """Show a dialog with the full-size image maximized.
-        
-        Args:
-            image_path: Full path to the image file.
-            image_name: Display name for the image.
-        """
-        with ui.dialog() as dialog:
-            dialog.props('maximized')
+    def _create_preview_dialog(self) -> None:
+        """Create the persistent preview dialog."""
+        with ui.dialog() as self._preview_dialog:
+            self._preview_dialog.props('maximized')
+            
+            def handle_key(e):
+                if not self._preview_dialog.value:
+                    return
+                if not e.action.keydown:
+                    return
+                    
+                if e.key == 'ArrowRight':
+                    self._next_preview_image()
+                elif e.key == 'ArrowLeft':
+                    self._prev_preview_image()
+            
+            ui.keyboard(on_key=handle_key)
             
             # Container using absolute positioning for reliable fullscreen layout
             with ui.element('div').style(
@@ -473,20 +496,66 @@ class ImageManager:
                     'height: 48px; width: 100%; '
                     'display: flex; align-items: center; justify-content: space-between; '
                     'padding: 0 16px; background-color: #111827; '
-                    'flex-shrink: 0; box-sizing: border-box;'
+                    'flex-shrink: 0; box-sizing: border-box; z-index: 50;'
                 ):
-                    ui.label(image_name).classes('text-lg font-semibold text-white')
-                    ui.button(icon='close', on_click=dialog.close).props('flat dense color=white')
+                    self._preview_label = ui.label('').classes('text-lg font-semibold text-white')
+                    ui.button(icon='close', on_click=self._preview_dialog.close).props('flat dense color=white')
                 
                 # Image container - fills remaining space
                 with ui.element('div').style(
-                    'flex: 1; width: 100%; '
+                    'flex: 1; width: 100%; position: relative; '
                     'display: flex; align-items: center; justify-content: center; '
-                    'overflow: hidden; padding: 16px; box-sizing: border-box;'
+                    'overflow: hidden; background-color: #000;'
                 ):
-                    ui.image(image_path).props('fit=contain').classes('w-full h-full')
+                    self._preview_image = ui.image('').props('fit=contain').classes('w-full h-full')
+                    
+                    # Navigation overlay
+                    with ui.element('div').classes('absolute inset-0 flex items-center justify-between px-4 pointer-events-none'):
+                        ui.button(icon='chevron_left', on_click=self._prev_preview_image).props('flat round color=white size=lg').classes('pointer-events-auto bg-black/30 hover:bg-black/50')
+                        ui.button(icon='chevron_right', on_click=self._next_preview_image).props('flat round color=white size=lg').classes('pointer-events-auto bg-black/30 hover:bg-black/50')
+
+    def _update_preview_content(self) -> None:
+        """Update the content of the preview dialog based on current state."""
+        if not self._preview_images or self._preview_index < 0 or self._preview_index >= len(self._preview_images):
+            return
+            
+        data = self._preview_images[self._preview_index]
+        path = data['path']
+        name = data.get('name', Path(path).stem)
         
-        dialog.open()
+        full_path = self._working_folder / path
+        
+        if self._preview_image:
+            self._preview_image.set_source(str(full_path))
+        if self._preview_label:
+            self._preview_label.set_text(name)
+
+    def _next_preview_image(self) -> None:
+        """Show next image in preview."""
+        if self._preview_index < len(self._preview_images) - 1:
+            self._preview_index += 1
+            self._update_preview_content()
+
+    def _prev_preview_image(self) -> None:
+        """Show previous image in preview."""
+        if self._preview_index > 0:
+            self._preview_index -= 1
+            self._update_preview_content()
+
+    def _show_image_dialog(self, images: list[dict], start_index: int) -> None:
+        """Show a dialog with the full-size image maximized.
+        
+        Args:
+            images: List of image data dictionaries.
+            start_index: Index of the image to start with.
+        """
+        if not self._preview_dialog:
+            self._create_preview_dialog()
+            
+        self._preview_images = images
+        self._preview_index = start_index
+        self._update_preview_content()
+        self._preview_dialog.open()
 
     def refresh(self) -> None:
         """Refresh the image manager display."""
