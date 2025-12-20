@@ -59,6 +59,7 @@ class BookCreatorApp:
         self.last_folder_state: dict[str, set[str]] = {}
         self.log_file: Optional[Path] = None
         self.refresh_callbacks: list[Callable[[], None]] = []
+        self.check_settings_dirty: Optional[Callable[[], bool]] = None
         
         # Session state for tabs (preserved when switching)
         self.session_state: dict[str, Any] = {
@@ -307,87 +308,108 @@ def stop_folder_watcher() -> None:
 
 def build_settings_tab():
     """Build the Settings tab content."""
-    with ui.column().classes('w-full gap-6 p-4'):
-        # API Configuration
-        with ui.card().classes('w-full'):
-            ui.label('API Configuration').classes('text-lg font-bold')
-            
-            ui.markdown(
-                '**DISCLAIMER & COST WARNING:** Usage of this application involves calls to Google\'s Gemini API, which may incur significant costs. '
-                'You are solely responsible for monitoring and paying for your API usage. '
-                'The token counter provided herein is an estimate only and should not be relied upon for billing purposes. '
-                'Always verify actual usage and costs via the Google Cloud Console or AI Studio. '
-                'The authors of this software accept no liability for any costs, damages, or data loss incurred. '
-                'By using this tool, you acknowledge that your data is processed by Google\'s services and is subject to their Terms of Service and Privacy Policy.'
-            ).classes('text-red-600 text-sm mb-1')
-            
-            with ui.row().classes('gap-4 mb-4'):
-                ui.link('Gemini API Pricing', GEMINI_PRICING_URL).classes('text-primary underline').props('target=_blank')
-                ui.link('Get API Key', 'https://aistudio.google.com/app/apikey').classes('text-primary underline').props('target=_blank')
+    with ui.column().classes('w-full p-0 gap-0'):
+        with ui.column().classes('w-full gap-6 p-4'):
+            # API Configuration
+            with ui.card().classes('w-full'):
+                ui.label('API Configuration').classes('text-lg font-bold')
+                
+                ui.markdown(
+                    '**DISCLAIMER & COST WARNING:** Usage of this application involves calls to Google\'s Gemini API, which may incur significant costs. '
+                    'You are solely responsible for monitoring and paying for your API usage. '
+                    'The token counter provided herein is an estimate only and should not be relied upon for billing purposes. '
+                    'Always verify actual usage and costs via the Google Cloud Console or AI Studio. '
+                    'The authors of this software accept no liability for any costs, damages, or data loss incurred. '
+                    'By using this tool, you acknowledge that your data is processed by Google\'s services and is subject to their Terms of Service and Privacy Policy.'
+                ).classes('text-red-600 text-sm mb-1')
+                
+                with ui.row().classes('gap-4 mb-4'):
+                    ui.link('Gemini API Pricing', GEMINI_PRICING_URL).classes('text-primary underline').props('target=_blank')
+                    ui.link('Get API Key', 'https://aistudio.google.com/app/apikey').classes('text-primary underline').props('target=_blank')
 
-            api_key_input = ui.input(
-                'API Key',
-                password=True,
-                password_toggle_button=True,
-            ).classes('w-full').props('outlined')
-            api_key_input._props['marker'] = 'api-key-input'
+                api_key_input = ui.input(
+                    'API Key',
+                    password=True,
+                    password_toggle_button=True,
+                ).classes('w-full').props('outlined')
+                api_key_input._props['marker'] = 'api-key-input'
+                
+                if APP.settings and APP.settings.has_api_key():
+                    api_key_input.value = '••••••••••••••••'
+                    ui.label('✓ API key is saved').classes('text-green-600 text-sm')
             
-            if APP.settings and APP.settings.has_api_key():
-                api_key_input.value = '••••••••••••••••'
-                ui.label('✓ API key is saved').classes('text-green-600 text-sm')
-        
-        # Working Folder
-        with ui.card().classes('w-full'):
-            ui.label('Working Folder').classes('text-lg font-bold')
+            # Working Folder
+            with ui.card().classes('w-full'):
+                ui.label('Working Folder').classes('text-lg font-bold')
+                
+                folder_label = ui.label(
+                    str(APP.settings.working_folder) if APP.settings and APP.settings.working_folder else 'Not set'
+                ).classes('text-gray-600')
+                
+                async def pick_folder():
+                    FOLDER_DIALOG = 20
+                    result = await app.native.main_window.create_file_dialog(
+                        dialog_type=FOLDER_DIALOG,
+                        allow_multiple=False,
+                    )
+                    if result:
+                        folder_path = Path(result[0]) if isinstance(result, tuple) else Path(result)
+                        if APP.settings is None:
+                            return
+                        APP.settings.working_folder = folder_path
+                        APP.ensure_logging()
+                        folder_label.text = str(folder_path)
+                        ui.notify(f'Working folder set to: {folder_path}', type='positive')
+                
+                ui.button('Browse...', on_click=pick_folder).props('outline')
             
-            folder_label = ui.label(
-                str(APP.settings.working_folder) if APP.settings and APP.settings.working_folder else 'Not set'
-            ).classes('text-gray-600')
+            # Aspect Ratio
+            with ui.card().classes('w-full'):
+                ui.label('Aspect Ratio').classes('text-lg font-bold')
+                
+                aspect_select = ui.select(
+                    ASPECT_RATIOS,
+                    value=APP.settings.aspect_ratio if APP.settings else '3:4',
+                    label='Page Aspect Ratio'
+                ).classes('w-48')
+                aspect_select._props['marker'] = 'aspect-ratio-select'
             
-            async def pick_folder():
-                FOLDER_DIALOG = 20
-                result = await app.native.main_window.create_file_dialog(
-                    dialog_type=FOLDER_DIALOG,
-                    allow_multiple=False,
-                )
-                if result:
-                    folder_path = Path(result[0]) if isinstance(result, tuple) else Path(result)
-                    if APP.settings is None:
-                        return
-                    APP.settings.working_folder = folder_path
-                    APP.ensure_logging()
-                    folder_label.text = str(folder_path)
-                    ui.notify(f'Working folder set to: {folder_path}', type='positive')
+            # Style Prompt (moved from separate section)
+            with ui.card().classes('w-full'):
+                ui.label('Book Style').classes('text-lg font-bold')
+                ui.label(
+                    'Describe the overall artistic style for your book. '
+                    'This will be applied to all generated images.'
+                ).classes('text-gray-600 text-sm mb-2')
+                
+                style_textarea = ui.textarea(
+                    'Style Prompt',
+                    value=APP.settings.style_prompt if APP.settings else '',
+                    placeholder='e.g., Whimsical watercolor style with soft pastel colors, '
+                               'reminiscent of classic children\'s book illustrations...'
+                ).classes('w-full').props('outlined rows=4')
+                style_textarea._props['marker'] = 'style-prompt-input'
             
-            ui.button('Browse...', on_click=pick_folder).props('outline')
-        
-        # Aspect Ratio
-        with ui.card().classes('w-full'):
-            ui.label('Aspect Ratio').classes('text-lg font-bold')
+        def check_dirty() -> bool:
+            if not APP.settings:
+                return False
             
-            aspect_select = ui.select(
-                ASPECT_RATIOS,
-                value=APP.settings.aspect_ratio if APP.settings else '3:4',
-                label='Page Aspect Ratio'
-            ).classes('w-48')
-            aspect_select._props['marker'] = 'aspect-ratio-select'
-        
-        # Style Prompt (moved from separate section)
-        with ui.card().classes('w-full'):
-            ui.label('Book Style').classes('text-lg font-bold')
-            ui.label(
-                'Describe the overall artistic style for your book. '
-                'This will be applied to all generated images.'
-            ).classes('text-gray-600 text-sm mb-2')
+            # API Key: Dirty if user typed something (value is not empty) AND it's not the masked value
+            if api_key_input.value and not api_key_input.value.startswith('•'):
+                return True
             
-            style_textarea = ui.textarea(
-                'Style Prompt',
-                value=APP.settings.style_prompt if APP.settings else '',
-                placeholder='e.g., Whimsical watercolor style with soft pastel colors, '
-                           'reminiscent of classic children\'s book illustrations...'
-            ).classes('w-full').props('outlined rows=4')
-            style_textarea._props['marker'] = 'style-prompt-input'
-        
+            # Aspect Ratio
+            if aspect_select.value != APP.settings.aspect_ratio:
+                return True
+                
+            # Style Prompt
+            if style_textarea.value != APP.settings.style_prompt:
+                return True
+                
+            return False
+
+        APP.check_settings_dirty = check_dirty
+
         # Save Button
         def save_settings():
             if APP.settings:
@@ -407,7 +429,8 @@ def build_settings_tab():
                     ui.notify('Settings saved. Configure API key and working folder to enable generation.', type='warning')
                     APP.trigger_refresh()
         
-        ui.button('Save Settings', on_click=save_settings, icon='save').props('color=primary')
+        with ui.row().classes('sticky bottom-0 w-full bg-white p-4 border-t z-10 justify-end shadow-lg'):
+            ui.button('Save Settings', on_click=save_settings, icon='save').props('color=primary')
 
 
 def build_add_tab():
@@ -1390,6 +1413,38 @@ def main_page():
                 manage_tab._props['marker'] = 'tab-manage'
                 export_tab = ui.tab('Export', icon='picture_as_pdf')
                 export_tab._props['marker'] = 'tab-export'
+
+            # Handle tab changes to warn about unsaved settings
+            current_tab = 'Instructions'
+
+            # Create dialog once
+            with ui.dialog() as dirty_dialog, ui.card():
+                ui.label('You have unsaved settings. Do you really want to leave?')
+                with ui.row().classes('w-full justify-end'):
+                    ui.button('Stay', on_click=lambda: dirty_dialog.submit('Stay'))
+                    ui.button('Leave', on_click=lambda: dirty_dialog.submit('Leave')).props('color=red')
+
+            async def on_tab_change(e):
+                nonlocal current_tab
+                new_tab = e.value
+                
+                # If we are moving away from settings
+                if current_tab == 'Settings' and new_tab != 'Settings':
+                    if APP.check_settings_dirty and APP.check_settings_dirty():
+                        # Revert immediately to prevent navigation
+                        tabs.value = 'Settings'
+                        
+                        dirty_dialog.open()
+                        result = await dirty_dialog
+                        if result == 'Leave':
+                            # User confirmed leaving, allow the change
+                            current_tab = new_tab
+                            tabs.value = new_tab
+                        return
+
+                current_tab = new_tab
+
+            tabs.on_value_change(on_tab_change)
         
         # Tab panels on the right (with keep-alive for state preservation)
         with ui.tab_panels(tabs, value=instructions_tab).props('keep-alive').classes('flex-1 overflow-auto'):

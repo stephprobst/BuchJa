@@ -1,8 +1,6 @@
 - Separate character sheet aspect ratio from book page aspect ratio?
 - Inspect the project.json file, how it is created, what is saved in it / how to start a new project.
-- Shift header text to the left
 - Allow editing of system prompts
-- Make settings auto-saved or easier to see save button
 - Make ready for Mac and Linux
 - End to end test
 - Clean up code
