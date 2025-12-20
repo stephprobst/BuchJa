@@ -528,17 +528,18 @@ def build_crop_tab():
                             notify_error('Working folder not configured!')
                             return
                         
-                        input_folder = APP.settings.get_subfolder('inputs')
-                        if input_folder:
+                        # Save crops to references folder by default
+                        ref_folder = APP.settings.get_subfolder('references')
+                        if ref_folder:
                             timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
                             crop_filename = f"crop_{timestamp}.png"
-                            crop_path = input_folder / crop_filename
+                            crop_path = ref_folder / crop_filename
                             save_cropped_image(data_url, crop_path)
                             
                             # if APP.project_manager:
-                            #     APP.project_manager.add_image(crop_path, 'inputs', crop_path.stem)
+                            #     APP.project_manager.add_image(crop_path, 'references', crop_path.stem)
                             
-                            ui.notify(f'Cropped image saved: {crop_filename}', type='positive')
+                            ui.notify(f'Cropped image saved to references: {crop_filename}', type='positive')
                             check_folder_changes()
                             build_crop_source_grid()  # Refresh to show new image
                     
@@ -598,13 +599,15 @@ def build_generate_tab():
 
                 with ui.row().classes('items-center gap-1'):
                     p_threshold_input = ui.number(
-                        'P-Threshold',
+                        'Top-P',
                         value=APP.settings.p_threshold if APP.settings else 0.95,
                         min=0.0, max=1.0, step=0.05,
                         format='%.2f'
                     ).classes('w-28').props('outlined dense')
                     with ui.icon('info', size='xs').classes('text-gray-400 cursor-help'):
-                        ui.tooltip('Controls randomness: Lower values make responses more deterministic.')
+                        ui.tooltip(
+                            'Lower values make output more focused and predictable; higher values allow more variety. Allowed values are between 0.0 and 1.0. Usually leave this near the default (0.95) and tune Temperature first.'
+                        )
                 
                 with ui.row().classes('items-center gap-1'):
                     temperature_input = ui.number(
@@ -614,7 +617,7 @@ def build_generate_tab():
                         format='%.1f'
                     ).classes('w-28').props('outlined dense')
                     with ui.icon('info', size='xs').classes('text-gray-400 cursor-help'):
-                        ui.tooltip('Controls creativity: Higher values make output more random/creative.')
+                        ui.tooltip('Controls creativity: Higher values make output more random/creative. This deteremines how wild the model behaves. Allowed values are between 0.0 and 2.0. Experiment with this first before using Top-P.')
         
         # Rework source selection (only visible in Rework mode)
         rework_section = ui.column().classes('w-full')
@@ -846,8 +849,8 @@ def build_generate_tab():
                 reference_images = []
                 if APP.project_manager and APP.settings:
                     # Check all image categories for selected references
-                    for category in ['references', 'inputs', 'pages']:
-                        images = APP.project_manager.get_images(category)
+                    for cat in ['references', 'inputs', 'pages']:
+                        images = APP.project_manager.get_images(cat)
                         for img in images:
                             if selected_references.get(img.get('id'), False):
                                 img_path = img.get('path')

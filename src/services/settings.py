@@ -247,14 +247,14 @@ class Settings:
 
     @property
     def p_threshold(self) -> float:
-        """Get the p-threshold (nucleus sampling) value."""
+        """Get the Top-P (nucleus sampling) value."""
         return self._project_config.get("p_threshold", self._config.get("p_threshold", 0.95))
 
     @p_threshold.setter
     def p_threshold(self, value: float) -> None:
-        """Set the p-threshold value."""
+        """Set the Top-P value."""
         if not (0.0 <= value <= 1.0):
-             raise ValueError("P-threshold must be between 0.0 and 1.0")
+             raise ValueError("Top-P must be between 0.0 and 1.0")
         
         if self.working_folder:
             self._project_config["p_threshold"] = value

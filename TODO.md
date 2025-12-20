@@ -1,6 +1,4 @@
 - Add file rename button in image management tab
-- When generating images, add character sheets automatically to references and pages to pages. Crops should also be added to references.
-- Think about process to add text
 - Sketch canvas to resize
 - Inspect the project.json file, how it is created, what is saved in it / how to start a new project.
 - Shift header text to the left
