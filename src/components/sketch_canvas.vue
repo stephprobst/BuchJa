@@ -18,7 +18,7 @@
       <button @click="clearCanvas" title="Clear">
         🗑️ Clear
       </button>
-      <button @click="exportPng" title="Save">
+      <button @click="exportPng" title="Save" class="save-btn">
         💾 Save
       </button>
       
@@ -221,6 +221,19 @@ export default {
   background: #1976d2;
   color: white;
   border-color: #1976d2;
+}
+
+.toolbar button.save-btn {
+  background: #5898d4; /* NiceGUI default primary */
+  color: white;
+  border-color: #5898d4;
+  font-weight: bold;
+  margin-left: auto; /* Push to right if flex container allows, though toolbar is flex-wrap */
+}
+
+.toolbar button.save-btn:hover {
+  background: #4a8ac6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .brush-size, .color-picker {

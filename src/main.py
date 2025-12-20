@@ -782,21 +782,6 @@ def build_generate_tab():
             
             ui.button('↻ Refresh', on_click=build_refs_grid).props('flat dense').classes('mt-2')
         
-        # Sketch section
-        sketch_data = {'data_url': APP.session_state.get('sketch_data_url')}
-        
-        with ui.expansion('Add a sketch for composition (optional)', icon='brush').classes('w-full'):
-            def on_sketch_save(data_url: str):
-                sketch_data['data_url'] = data_url
-                APP.session_state['sketch_data_url'] = data_url
-                ui.notify('Sketch attached to next prompt!', type='positive')
-            
-            SketchCanvas(
-                width=600,
-                height=400,
-                on_save=on_sketch_save
-            )
-        
         # Action buttons
         with ui.row().classes('gap-2 mt-4'):
             async def generate():
@@ -835,19 +820,6 @@ def build_generate_tab():
                                     if full_path.exists():
                                         reference_images.append(full_path)
                 
-                # Save sketch if provided
-                sketch_path = None
-                if sketch_data['data_url']:
-                    # Save sketches to inputs folder
-                    sketch_folder = APP.settings.get_subfolder('inputs') if APP.settings else None
-                    if sketch_folder:
-                        timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-                        sketch_path = sketch_folder / f"sketch_{timestamp}.png"
-                        save_sketch_to_file(sketch_data['data_url'], sketch_path)
-                        # Add sketch to project manager so it can be used later?
-                        # if APP.project_manager:
-                        #     APP.project_manager.add_image(sketch_path, 'inputs', sketch_path.stem)
-                
                 try:
                     if mode == 'Create':
                         # Create new image
@@ -858,7 +830,6 @@ def build_generate_tab():
                                 image_path, thumb_path = await APP.image_service.generate_image(
                                     prompt=prompt,
                                     reference_images=reference_images if reference_images else None,
-                                    sketch=sketch_path,
                                     style_prompt=APP.settings.style_prompt if APP.settings else '',
                                     aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
                                     image_size=resolution,
@@ -872,7 +843,6 @@ def build_generate_tab():
                             image_path, thumb_path = await APP.image_service.generate_image(
                                 prompt=prompt,
                                 reference_images=reference_images if reference_images else None,
-                                sketch=sketch_path,
                                 style_prompt=APP.settings.style_prompt if APP.settings else '',
                                 aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
                                 image_size=resolution,
@@ -895,7 +865,6 @@ def build_generate_tab():
                                     original_image=rework_source_path[0],
                                     prompt=prompt,
                                     additional_references=reference_images if reference_images else None,
-                                    sketch=sketch_path,
                                     style_prompt=APP.settings.style_prompt if APP.settings else '',
                                     aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
                                     image_size=resolution,
@@ -909,7 +878,6 @@ def build_generate_tab():
                                 original_image=rework_source_path[0],
                                 prompt=prompt,
                                 additional_references=reference_images if reference_images else None,
-                                sketch=sketch_path,
                                 style_prompt=APP.settings.style_prompt if APP.settings else '',
                                 aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
                                 image_size=resolution,
@@ -994,6 +962,64 @@ def build_generate_tab():
         # Register refresh callbacks
         APP.register_refresh_callback(build_rework_source_selector)
         APP.register_refresh_callback(build_refs_grid)
+
+
+def build_sketch_tab():
+    """Build the Sketch tab content."""
+    with ui.column().classes('w-full gap-6 p-4'):
+        with ui.card().classes('w-full'):
+            ui.label('Sketching Canvas').classes('text-lg font-bold')
+            ui.label(
+                'Draw a rough sketch to use as a reference for generation.'
+            ).classes('text-gray-600 text-sm mb-4')
+            
+            with ui.row().classes('w-full items-center gap-4 mb-4'):
+                filename_input = ui.input(
+                    'Sketch Name',
+                    value='my_sketch',
+                    placeholder='Enter filename'
+                ).classes('w-64')
+                
+                ui.label('Sketches are saved to the "References" folder.').classes('text-gray-500 text-sm italic')
+            
+            async def save_sketch(data_url: str):
+                if not APP.settings or not APP.settings.working_folder:
+                    notify_error('Please configure settings first!')
+                    return
+                
+                if not data_url:
+                    return
+
+                try:
+                    # Save to references folder
+                    refs_folder = APP.settings.working_folder / 'references'
+                    refs_folder.mkdir(parents=True, exist_ok=True)
+                    
+                    name = filename_input.value or 'sketch'
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"{name}_{timestamp}.png"
+                    file_path = refs_folder / filename
+                    
+                    save_sketch_to_file(data_url, file_path)
+                    
+                    # No need to call add_image as we saved directly to the folder
+                    # and add_image would create a duplicate
+                        
+                    ui.notify(f'Sketch saved: {filename}', type='positive')
+                    
+                    # Refresh other tabs if needed
+                    APP.trigger_refresh()
+                    
+                except Exception as e:
+                    logger.exception('Failed to save sketch')
+                    notify_error(f'Failed to save sketch: {e}')
+
+            SketchCanvas(
+                width=800,
+                height=600,
+                on_save=save_sketch,
+                background_color='#ffffff'
+            )
 
 
 def build_instructions_tab():
@@ -1290,6 +1316,8 @@ def main_page():
                 add_tab._props['marker'] = 'tab-add'
                 crop_tab = ui.tab('Crop', icon='crop')
                 crop_tab._props['marker'] = 'tab-crop'
+                sketch_tab = ui.tab('Sketch', icon='brush')
+                sketch_tab._props['marker'] = 'tab-sketch'
                 generate_tab = ui.tab('Generate', icon='auto_awesome')
                 generate_tab._props['marker'] = 'tab-generate'
                 manage_tab = ui.tab('Manage', icon='folder')
@@ -1310,6 +1338,9 @@ def main_page():
             
             with ui.tab_panel(crop_tab):
                 build_crop_tab()
+            
+            with ui.tab_panel(sketch_tab):
+                build_sketch_tab()
             
             with ui.tab_panel(generate_tab):
                 build_generate_tab()
