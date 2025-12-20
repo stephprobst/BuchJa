@@ -239,6 +239,41 @@ class ProjectManager:
             
         logger.info("Updated page order")
 
+    def rename_image(self, image_id: str, new_name: str) -> bool:
+        """Rename an image."""
+        source_path = self._working_folder / image_id
+        if not source_path.exists():
+            return False
+            
+        category = source_path.parent.name
+        
+        # Construct new filename
+        if category == 'pages':
+            # Keep the prefix
+            match = re.match(r'^(\d{3}_)(.*)', source_path.name)
+            if match:
+                prefix = match.group(1)
+                target_name = f"{prefix}{new_name}{source_path.suffix}"
+            else:
+                # Should not happen for pages, but fallback
+                target_name = f"{new_name}{source_path.suffix}"
+        else:
+            target_name = f"{new_name}{source_path.suffix}"
+            
+        target_path = source_path.parent / target_name
+        
+        if target_path.exists() and target_path != source_path:
+            logger.warning(f"Target {target_path} already exists")
+            return False
+            
+        try:
+            self._rename_file_and_thumb(source_path, target_path)
+            logger.info(f"Renamed {image_id} to {target_name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to rename {image_id}: {e}")
+            return False
+
     def _rename_file_and_thumb(self, src: Path, dst: Path):
         try:
             # Rename thumbnail first (using src stem)
@@ -390,6 +425,30 @@ class ImageManager:
             for img in images:
                 self._build_image_card(img, category)
 
+    def _show_rename_dialog(self, image_id: str, current_name: str) -> None:
+        """Show dialog to rename image."""
+        with ui.dialog() as dialog, ui.card():
+            ui.label('Rename Image').classes('text-lg font-bold')
+            name_input = ui.input('New Name', value=current_name).classes('w-full')
+            
+            def save():
+                new_name = name_input.value.strip()
+                if new_name and new_name != current_name:
+                    if self._project.rename_image(image_id, new_name):
+                        ui.notify('Image renamed')
+                        dialog.close()
+                        self.refresh()
+                    else:
+                        ui.notify('Failed to rename (name might exist)', type='negative')
+                else:
+                    dialog.close()
+            
+            with ui.row().classes('w-full justify-end'):
+                ui.button('Cancel', on_click=dialog.close).props('flat')
+                ui.button('Save', on_click=save).props('flat')
+        
+        dialog.open()
+
     def _build_image_card(self, image_data: dict, category: str, index: int = -1, total: int = 0) -> None:
         """Build an image card with thumbnail and controls."""
         image_id = image_data['id']
@@ -448,6 +507,12 @@ class ImageManager:
                 
                 ui.button(icon='visibility', on_click=view_image).props('flat dense round size=sm').tooltip('View')
                 
+                # Rename
+                def rename(iid=image_id, current_name=image_name):
+                    self._show_rename_dialog(iid, current_name)
+                
+                ui.button(icon='edit', on_click=rename).props('flat dense round size=sm').tooltip('Rename')
+
                 # Move to different category
                 with ui.button(icon='drive_file_move').props('flat dense round size=sm').tooltip('Move'):
                     with ui.menu() as menu:
