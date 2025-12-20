@@ -687,6 +687,9 @@ def build_generate_tab():
                                         
                                         card.on('click', select_rework)
         
+        # Reference selection state
+        selected_references: dict[str, bool] = dict(APP.session_state.get('selected_references', {}))
+
         # Prompt input
         with ui.card().classes('w-full'):
             prompt_label = ui.label('Prompt').classes('text-lg font-bold')
@@ -705,12 +708,41 @@ def build_generate_tab():
             def save_prompt():
                 APP.session_state['generate_prompt'] = description_input.value
             description_input.on('blur', save_prompt)
+
+            # Selected references display
+            selected_refs_container = ui.row().classes('w-full gap-2 mt-2')
+            
+            def update_selected_refs_display():
+                selected_refs_container.clear()
+                if not APP.project_manager: return
+                
+                selected_ids = [rid for rid, selected in selected_references.items() if selected]
+                if not selected_ids:
+                    return
+
+                # Fetch all images to find names
+                all_imgs = []
+                for cat in ['references', 'inputs', 'pages']:
+                    all_imgs.extend(APP.project_manager.get_images(cat))
+                
+                id_to_name = {img['id']: img.get('name', Path(img['path']).stem) for img in all_imgs}
+                
+                with selected_refs_container:
+                    for rid in selected_ids:
+                        name = id_to_name.get(rid, 'Unknown')
+                        ui.chip(name, icon='image', removable=True).on('remove', lambda e, rid=rid: remove_ref(rid))
+
+            def remove_ref(rid):
+                selected_references[rid] = False
+                APP.session_state['selected_references'] = selected_references
+                update_selected_refs_display()
+                build_refs_grid()
         
         # Reference selection
-        selected_references: dict[str, bool] = dict(APP.session_state.get('selected_references', {}))
-        
         with ui.card().classes('w-full'):
-            ui.label('Select References').classes('text-lg font-bold')
+            with ui.row().classes('w-full items-center justify-between'):
+                ui.label('Select References').classes('text-lg font-bold')
+                show_all_types = ui.switch('Show pages and inputs', value=False).props('dense')
             
             refs_grid = ui.element('div').classes('w-full')
             
@@ -723,9 +755,12 @@ def build_generate_tab():
                     
                     # Show references, inputs, and pages
                     references = APP.project_manager.get_images('references')
-                    inputs = APP.project_manager.get_images('inputs')
-                    pages = APP.project_manager.get_images('pages')
-                    all_refs = references + inputs + pages
+                    if show_all_types.value:
+                        inputs = APP.project_manager.get_images('inputs')
+                        pages = APP.project_manager.get_images('pages')
+                        all_refs = references + inputs + pages
+                    else:
+                        all_refs = references
                     
                     if not all_refs:
                         ui.label('No images available.').classes('text-gray-500 text-sm')
@@ -775,10 +810,13 @@ def build_generate_tab():
                                                 card.style('border: 2px solid #6366f1;')
                                             else:
                                                 card.style('border: 2px solid transparent;')
+                                            update_selected_refs_display()
                                         
                                         card.on('click', toggle_ref)
             
             build_refs_grid()
+            update_selected_refs_display()
+            show_all_types.on('update:model-value', build_refs_grid)
             
             ui.button('↻ Refresh', on_click=build_refs_grid).props('flat dense').classes('mt-2')
         

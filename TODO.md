@@ -1,4 +1,3 @@
-- Add toggle to Generate -> Select References that allows to show inputs and pages.
 - Add file rename button in image management tab
 - When generating images, add character sheets automatically to references and pages to pages. Crops should also be added to references.
 - Sketch save button easier to see
