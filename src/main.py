@@ -402,8 +402,10 @@ def build_settings_tab():
                 if init_image_service():
                     start_folder_watcher()
                     ui.notify('Settings saved successfully!', type='positive')
+                    APP.trigger_refresh()
                 else:
                     ui.notify('Settings saved. Configure API key and working folder to enable generation.', type='warning')
+                    APP.trigger_refresh()
         
         ui.button('Save Settings', on_click=save_settings, icon='save').props('color=primary')
 
@@ -1011,8 +1013,8 @@ def build_sketch_tab():
         with ui.card().classes('w-full'):
             ui.label('Sketching Canvas').classes('text-lg font-bold')
             ui.label(
-                'Draw a rough sketch to use as a reference for generation.'
-            ).classes('text-gray-600 text-sm mb-4')
+                'Draw a rough sketch to use as a reference for generation. Aspect ratio of the page matches the aspect ratio of the book settings.'
+            ).classes('text-gray-600 text-sm mb-4') 
             
             with ui.row().classes('w-full items-center gap-4 mb-4'):
                 filename_input = ui.input(
@@ -1055,12 +1057,35 @@ def build_sketch_tab():
                     logger.exception('Failed to save sketch')
                     notify_error(f'Failed to save sketch: {e}')
 
-            SketchCanvas(
-                width=800,
-                height=600,
-                on_save=save_sketch,
-                background_color='#ffffff'
-            )
+            @ui.refreshable
+            def render_canvas():
+                width, height = 800, 600
+                if APP.settings:
+                    try:
+                        ratio_str = APP.settings.aspect_ratio
+                        w_ratio, h_ratio = map(int, ratio_str.split(':'))
+                        
+                        # Calculate dimensions fitting in 800x600 box (or similar)
+                        # We'll use a max dimension of 800 for width or height
+                        max_dim = 800
+                        if w_ratio >= h_ratio:
+                            width = max_dim
+                            height = int(max_dim * (h_ratio / w_ratio))
+                        else:
+                            height = max_dim
+                            width = int(max_dim * (w_ratio / h_ratio))
+                    except Exception:
+                        pass
+
+                SketchCanvas(
+                    width=width,
+                    height=height,
+                    on_save=save_sketch,
+                    background_color='#ffffff'
+                )
+            
+            render_canvas()
+            APP.register_refresh_callback(render_canvas.refresh)
 
 
 def build_instructions_tab():

@@ -1,5 +1,4 @@
-- Add file rename button in image management tab
-- Sketch canvas to resize
+- Separate character sheet aspect ratio from book page aspect ratio?
 - Inspect the project.json file, how it is created, what is saved in it / how to start a new project.
 - Shift header text to the left
 - Allow editing of system prompts
