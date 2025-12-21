@@ -112,9 +112,31 @@ class BookCreatorApp:
 APP = BookCreatorApp()
 
 
-def notify_error(message: str) -> None:
-    """Show a non-auto-dismissing error notification."""
-    ui.notify(message, type='negative', timeout=0)
+def notify_error(message: str, exception: Optional[Exception] = None) -> None:
+    """Show an error dialog with details."""
+    if exception:
+        logger.error(message, exc_info=exception)
+    else:
+        logger.error(message)
+
+    with ui.dialog() as dialog, ui.card().classes('w-full max-w-lg'):
+        ui.label('Error').classes('text-h6 text-negative')
+        ui.label(message).classes('text-body1 whitespace-pre-wrap')
+        
+        if exception and isinstance(exception, ImageGenerationError) and getattr(exception, 'is_api_error', False):
+             ui.label('This appears to be an error from the Gemini API.').classes('text-caption text-grey')
+
+        ui.separator().classes('my-2')
+        
+        ui.label('For more details, check the logs at:').classes('text-caption font-bold')
+        log_path = APP.log_file if APP.log_file else "logs/book_creator.log"
+        ui.label(str(log_path)).classes('text-caption text-grey break-all font-mono bg-gray-100 p-1 rounded')
+
+        with ui.row().classes('w-full justify-end mt-4'):
+            ui.button('Copy Error', on_click=lambda: ui.clipboard.write(message)).props('flat icon=content_copy')
+            ui.button('Close', on_click=dialog.close).props('flat icon=close')
+    
+    dialog.open()
 
 
 def init_services():
@@ -1082,10 +1104,10 @@ def build_generate_tab():
                         APP.image_manager.refresh()
                 
                 except ImageGenerationError as e:
-                    notify_error(f'Generation failed: {e}')
+                    notify_error(f'Generation failed: {e}', e)
                 except Exception as e:
                     logger.exception('Unexpected error during generation')
-                    notify_error(f'Unexpected error: {e}')
+                    notify_error(f'Unexpected error: {e}', e)
             
             generate_btn = ui.button(
                 'Generate',
@@ -1207,7 +1229,7 @@ def build_sketch_tab():
                     
                 except Exception as e:
                     logger.exception('Failed to save sketch')
-                    notify_error(f'Failed to save sketch: {e}')
+                    notify_error(f'Failed to save sketch: {e}', e)
 
             @ui.refreshable
             def render_canvas():
@@ -1398,7 +1420,7 @@ def build_export_tab():
                         ui.notify(f'PDF exported: {output_path}', type='positive')
                     except Exception as e:
                         logger.exception('PDF export failed')
-                        notify_error(f'Export failed: {e}')
+                        notify_error(f'Export failed: {e}', e)
             
             def open_export_folder():
                 if not APP.settings:

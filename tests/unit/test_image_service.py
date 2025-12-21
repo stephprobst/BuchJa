@@ -335,7 +335,7 @@ class TestImageServiceErrors:
         
         service = ImageService("test-api-key", working_folder)
         
-        with pytest.raises(ImageGenerationError, match="API call failed"):
+        with pytest.raises(ImageGenerationError, match="Gemini API Error"):
             await service.generate_image("Test prompt", category="pages")
 
     @pytest.mark.asyncio

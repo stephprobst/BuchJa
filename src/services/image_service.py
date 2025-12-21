@@ -40,7 +40,9 @@ TEMPLATES = get_templates(config=_AI_CONFIG)
 
 class ImageGenerationError(Exception):
     """Raised when image generation fails."""
-    pass
+    def __init__(self, message: str, is_api_error: bool = False):
+        super().__init__(message)
+        self.is_api_error = is_api_error
 
 
 class ImageService:
@@ -484,7 +486,7 @@ class ImageService:
             
         except Exception as e:
             logger.exception(f"API call failed: {e}")
-            raise ImageGenerationError(f"API call failed: {e}") from e
+            raise ImageGenerationError(f"Gemini API Error: {e}", is_api_error=True) from e
 
     async def generate_character_sheet(
         self,
