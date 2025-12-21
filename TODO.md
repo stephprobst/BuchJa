@@ -1,6 +1,3 @@
-- Making sure all errors get logged.
-- Making sure the error popup goes away eventually
-- Add instructions to look into log when error appears.
 - Rework system prompts
 - Make ready for Mac and Linux
 - End to end test
