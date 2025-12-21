@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "Create illustrated books with AI image generation"
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "Book Creator Team" }]
+license = "MIT"
+authors = [{ name = "Stephan Probst" }]
 dependencies = [
     "nicegui[native]>=2.0.0",
     "google-genai>=1.0.0",
@@ -17,7 +18,16 @@ dependencies = [
     "reportlab>=4.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/stephprobst/book_creator"
+Repository = "https://github.com/stephprobst/book_creator"
+Documentation = "https://github.com/stephprobst/book_creator#readme"
+
+
 [project.optional-dependencies]
+bundle = ["pyinstaller>=6.0.0"]
+
+[dependency-groups]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
@@ -25,7 +35,6 @@ dev = [
     "pytest-mock>=3.0.0",
     "pip-licenses>=5.0.0",
 ]
-bundle = ["pyinstaller>=6.0.0"]
 
 [project.scripts]
 book-creator = "src.main:main"
