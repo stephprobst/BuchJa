@@ -150,3 +150,5 @@ Thumbs.db
 *.pdf
 output/
 generated_images/
+research.md
+implementation_plan.md

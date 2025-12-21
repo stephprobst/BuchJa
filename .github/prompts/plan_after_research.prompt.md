@@ -1,8 +1,8 @@
 ---
-agent: 'Plan'
-name: 'plan_after_research'
+agent: 'PlanAfterResearch'
+name: 'PlanAfterResearch'
 model: Gemini 3 Pro (Preview)
-description: 'Plan based on previous research task.'
+description: 'Plan based on previous research task, creating implementation_plan.md.'
 ---
 Create an implementation plan for the tasks outlined in `research.md` in the repository root. Make sure to read the full file and consider all relationships
 and possible gotchas.
