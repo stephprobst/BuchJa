@@ -393,7 +393,7 @@ class ImageService:
         
         # Run generation in executor to not block event loop
         if progress_callback:
-            progress_callback('Calling Gemini API...')
+            progress_callback('Waiting for Gemini to finish image generation...')
         loop = asyncio.get_event_loop()
         api_result = await loop.run_in_executor(
             None,
@@ -756,7 +756,7 @@ class ImageService:
         
         # Run generation in executor to not block event loop
         if progress_callback:
-            progress_callback('Calling Gemini API for rework...')
+            progress_callback('Waiting for Gemini to finish image generation...')
         loop = asyncio.get_event_loop()
         api_result = await loop.run_in_executor(
             None,

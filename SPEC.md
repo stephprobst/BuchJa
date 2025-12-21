@@ -86,7 +86,8 @@ The application uses vertical tabs (`ui.tabs` with `vertical=True`) for main nav
 ### Settings Tab
 - API Key (stored in Windows Credential Locker via `keyring`)
 - Working Folder selection
-- Aspect Ratio dropdown
+- Aspect Ratio dropdown (Page Aspect Ratio)
+- Character Sheet Aspect Ratio dropdown (Optional, defaults to Page Aspect Ratio)
 - Book Style prompt (applied to all generations)
 
 ### Add Tab

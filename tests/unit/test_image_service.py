@@ -197,7 +197,7 @@ class TestImageService:
             progress_callback=progress.append,
         )
 
-        assert 'Calling Gemini API...' in progress
+        assert 'Waiting for Gemini to finish image generation...' in progress
         assert 'Saving generated image...' in progress
         assert 'Creating thumbnail...' in progress
 

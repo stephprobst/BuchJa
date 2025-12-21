@@ -73,6 +73,7 @@ def configure_logging(
 
     # Keep noisy libraries from drowning our logs.
     logging.getLogger("google").setLevel(logging.WARNING)
+    logging.getLogger("google_genai").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     return log_file

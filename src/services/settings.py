@@ -222,6 +222,41 @@ class Settings:
             self._config["aspect_ratio"] = ratio
             self._save_config()
 
+    @property
+    def character_sheet_aspect_ratio(self) -> Optional[str]:
+        """Get the current character sheet aspect ratio setting.
+        
+        Returns:
+            The aspect ratio string, or None if not set (meaning use page aspect ratio).
+        """
+        return self._project_config.get("character_sheet_aspect_ratio", self._config.get("character_sheet_aspect_ratio"))
+
+    @character_sheet_aspect_ratio.setter
+    def character_sheet_aspect_ratio(self, ratio: Optional[str]) -> None:
+        """Set the character sheet aspect ratio.
+        
+        Args:
+            ratio: Aspect ratio string (e.g., "3:4", "16:9") or None to unset.
+        
+        Raises:
+            ValueError: If ratio is not None and not in allowed values.
+        """
+        if ratio is not None and ratio not in ASPECT_RATIOS:
+            raise ValueError(f"Invalid aspect ratio: {ratio}. Must be one of {ASPECT_RATIOS} or None")
+        
+        if self.working_folder:
+            if ratio is None:
+                self._project_config.pop("character_sheet_aspect_ratio", None)
+            else:
+                self._project_config["character_sheet_aspect_ratio"] = ratio
+            self._save_project_config()
+        else:
+            if ratio is None:
+                self._config.pop("character_sheet_aspect_ratio", None)
+            else:
+                self._config["character_sheet_aspect_ratio"] = ratio
+            self._save_config()
+
     # --- Style Prompt ---
 
     @property
@@ -379,6 +414,7 @@ class Settings:
         return {
             "working_folder": str(self.working_folder) if self.working_folder else None,
             "aspect_ratio": self.aspect_ratio,
+            "character_sheet_aspect_ratio": self.character_sheet_aspect_ratio,
             "style_prompt": self.style_prompt,
             "p_threshold": self.p_threshold,
             "temperature": self.temperature,

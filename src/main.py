@@ -377,14 +377,27 @@ def build_settings_tab():
             
             # Aspect Ratio
             with ui.card().classes('w-full'):
-                ui.label('Aspect Ratio').classes('text-lg font-bold')
+                ui.label('Aspect Ratio (width:height)').classes('text-lg font-bold')
                 
-                aspect_select = ui.select(
-                    ASPECT_RATIOS,
-                    value=APP.settings.aspect_ratio if APP.settings else '3:4',
-                    label='Page Aspect Ratio (width:height)'
-                ).classes('w-48')
-                aspect_select._props['marker'] = 'aspect-ratio-select'
+                with ui.row().classes('w-full gap-4'):
+                    aspect_select = ui.select(
+                        ASPECT_RATIOS,
+                        value=APP.settings.aspect_ratio if APP.settings else '3:4',
+                        label='Page Aspect Ratio'
+                    ).classes('w-64')
+                    aspect_select._props['marker'] = 'aspect-ratio-select'
+
+                    # Character Sheet Aspect Ratio (Optional)
+                    char_aspect_options = {None: 'Same as Page'}
+                    for r in ASPECT_RATIOS:
+                        char_aspect_options[r] = r
+                    
+                    char_aspect_select = ui.select(
+                        char_aspect_options,
+                        value=APP.settings.character_sheet_aspect_ratio if APP.settings else None,
+                        label='Character Sheet Aspect Ratio'
+                    ).classes('w-64')
+                    char_aspect_select._props['marker'] = 'char-aspect-ratio-select'
             
             # Style Prompt (moved from separate section)
             with ui.card().classes('w-full'):
@@ -469,6 +482,10 @@ def build_settings_tab():
             # Aspect Ratio
             if aspect_select.value != APP.settings.aspect_ratio:
                 return True
+            
+            # Character Sheet Aspect Ratio
+            if char_aspect_select.value != APP.settings.character_sheet_aspect_ratio:
+                return True
                 
             # Style Prompt
             if style_textarea.value != APP.settings.style_prompt:
@@ -497,6 +514,7 @@ def build_settings_tab():
                     api_key_input.value = '••••••••••••••••'
                 
                 APP.settings.aspect_ratio = aspect_select.value
+                APP.settings.character_sheet_aspect_ratio = char_aspect_select.value
                 APP.settings.style_prompt = style_textarea.value
                 
                 # Save system prompt overrides
@@ -965,6 +983,14 @@ def build_generate_tab():
                 system_key = 'character_sheet' if gen_type == 'Character Sheet' else 'page'
                 resolution = resolution_select.value or '4K'
                 
+                # Determine aspect ratio
+                aspect_ratio = '3:4'
+                if APP.settings:
+                    if gen_type == 'Character Sheet':
+                        aspect_ratio = APP.settings.character_sheet_aspect_ratio or APP.settings.aspect_ratio
+                    else:
+                        aspect_ratio = APP.settings.aspect_ratio
+                
                 # Collect selected references
                 reference_images = []
                 if APP.project_manager and APP.settings:
@@ -992,7 +1018,7 @@ def build_generate_tab():
                                     prompt=prompt,
                                     reference_images=reference_images if reference_images else None,
                                     style_prompt=APP.settings.style_prompt if APP.settings else '',
-                                    aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
+                                    aspect_ratio=aspect_ratio,
                                     image_size=resolution,
                                     category=category,
                                     system_prompt_key=system_key,
@@ -1005,7 +1031,7 @@ def build_generate_tab():
                                 prompt=prompt,
                                 reference_images=reference_images if reference_images else None,
                                 style_prompt=APP.settings.style_prompt if APP.settings else '',
-                                aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
+                                aspect_ratio=aspect_ratio,
                                 image_size=resolution,
                                 category=category,
                                 system_prompt_key=system_key,
@@ -1027,7 +1053,7 @@ def build_generate_tab():
                                     prompt=prompt,
                                     additional_references=reference_images if reference_images else None,
                                     style_prompt=APP.settings.style_prompt if APP.settings else '',
-                                    aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
+                                    aspect_ratio=aspect_ratio,
                                     image_size=resolution,
                                     category=category,
                                     p_threshold=p_threshold_input.value,
@@ -1040,7 +1066,7 @@ def build_generate_tab():
                                 prompt=prompt,
                                 additional_references=reference_images if reference_images else None,
                                 style_prompt=APP.settings.style_prompt if APP.settings else '',
-                                aspect_ratio=APP.settings.aspect_ratio if APP.settings else '3:4',
+                                aspect_ratio=aspect_ratio,
                                 image_size=resolution,
                                 category=category,
                                 p_threshold=p_threshold_input.value,
@@ -1139,7 +1165,7 @@ def build_sketch_tab():
         with ui.card().classes('w-full'):
             ui.label('Sketching Canvas').classes('text-lg font-bold')
             ui.label(
-                'Draw a rough sketch to use as a reference for generation. Aspect ratio of the page matches the aspect ratio of the book settings.'
+                'Draw a rough sketch to use as a reference for generation. Aspect ratio of the sketch canvas matches the aspect ratio of the book settings.'
             ).classes('text-gray-600 text-sm mb-4') 
             
             with ui.row().classes('w-full items-center gap-4 mb-4'):

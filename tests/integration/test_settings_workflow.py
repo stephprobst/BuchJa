@@ -79,6 +79,13 @@ class TestSettingsWorkflow:
         # Should see aspect ratio options
         await user.should_see('Aspect Ratio')
 
+    async def test_character_sheet_aspect_ratio_selection(self, user: User, mock_services):
+        """Test character sheet aspect ratio selection."""
+        await user.open('/')
+        
+        # Should see character sheet aspect ratio options
+        await user.should_see('Character Sheet Aspect Ratio')
+
     async def test_settings_validation_empty_key(self, user: User, mock_services):
         """Test validation when trying to save empty API key."""
         mock_services.get_api_key.return_value = ""

@@ -351,3 +351,25 @@ class TestSystemPromptOverrides:
         settings.set_system_prompt_override('character_sheet', 'Custom prompt')
         
         assert settings.get_system_prompt_override('character_sheet') is None
+
+    def test_character_sheet_aspect_ratio_default(self, config_path: Path):
+        """Test that character sheet aspect ratio defaults to None."""
+        settings = Settings(config_path)
+        assert settings.character_sheet_aspect_ratio is None
+
+    def test_character_sheet_aspect_ratio_setter(self, config_path: Path):
+        """Test setting and getting character sheet aspect ratio."""
+        settings = Settings(config_path)
+        
+        settings.character_sheet_aspect_ratio = "16:9"
+        assert settings.character_sheet_aspect_ratio == "16:9"
+        
+        settings.character_sheet_aspect_ratio = None
+        assert settings.character_sheet_aspect_ratio is None
+
+    def test_character_sheet_aspect_ratio_invalid(self, config_path: Path):
+        """Test that invalid character sheet aspect ratio raises ValueError."""
+        settings = Settings(config_path)
+        
+        with pytest.raises(ValueError, match="Invalid aspect ratio"):
+            settings.character_sheet_aspect_ratio = "invalid"
