@@ -1,7 +1,5 @@
 Version 0.1
 
-- Frontend license review and compliance (Vue / Cropper.js / etc.)
-
 - Clean up code
 - Rename project to avoid any brand issues
 
