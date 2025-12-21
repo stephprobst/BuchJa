@@ -47,11 +47,3 @@ nicegui-pack build.toml
 ```
 
 The built application will be in `dist/BookCreator/`.
-
-## Documentation
-
-See [SPEC.md](SPEC.md) for architecture, implementation details, and coding guidelines.
-
-## License
-
-MIT License - See LICENSE file for details.

@@ -7,3 +7,4 @@
 - Go through project metadata / author / license
 - Add proper Readme
 - Add disclaimer to Readme
+- Add license to toml

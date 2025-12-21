@@ -8,7 +8,6 @@ version = "0.1.0"
 description = "Create illustrated books with AI image generation"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
 authors = [{ name = "Book Creator Team" }]
 dependencies = [
     "nicegui[native]>=2.0.0",
@@ -24,6 +23,7 @@ dev = [
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.0.0",
+    "pip-licenses>=5.0.0",
 ]
 bundle = ["pyinstaller>=6.0.0"]
 
