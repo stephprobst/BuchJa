@@ -507,6 +507,30 @@ class ImageManager:
                 
                 ui.button(icon='visibility', on_click=view_image).props('flat dense round size=sm').tooltip('View')
                 
+                # Edit in Photos (Windows only)
+                if platform.system() == "Windows":
+                    def edit_in_photos(path=image_path):
+                        full_path = self._working_folder / path
+                        try:
+                            os.startfile(full_path, 'edit')
+                        except OSError as e:
+                            # WinError 1155: No application is associated with the specified file for this operation
+                            if getattr(e, 'winerror', 0) == 1155:
+                                try:
+                                    # Fallback to opening the file (usually opens Photos)
+                                    os.startfile(full_path)
+                                except Exception as e2:
+                                    logger.error(f"Failed to open {full_path}: {e2}")
+                                    ui.notify(f"Could not open file: {e2}", type='negative')
+                            else:
+                                logger.error(f"Failed to open {full_path} for editing: {e}")
+                                ui.notify(f"Could not open for editing: {e}", type='negative')
+                        except Exception as e:
+                            logger.error(f"Failed to open {full_path} for editing: {e}")
+                            ui.notify(f"Could not open for editing: {e}", type='negative')
+                    
+                    ui.button(icon='photo_camera', on_click=edit_in_photos).props('flat dense round size=sm').tooltip('Edit in Photos (e.g. for background removal or removing individual objects)')
+
                 # Rename
                 def rename(iid=image_id, current_name=image_name):
                     self._show_rename_dialog(iid, current_name)

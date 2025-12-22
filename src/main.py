@@ -791,6 +791,9 @@ def build_generate_tab():
                 
                 with ui.card().classes('w-full'):
                     ui.label('Select Image to Rework').classes('text-lg font-bold')
+                    ui.label(
+                        'Warning: Frequent minor reworks through the AI model can cause the image quality to deteriorate. Recommended tacctics: (i) Recreate the image with a new prompt and the original references. (ii) Fundamentally change the image composition during the rework. (iii) Remove individual objects through an external app such as the Windows Photo Editor. (iv) Remove an element of the image with an external app such as the Windows Photo Editor and then re-add it with a new prompt.'
+                    ).classes('text-orange-400 text-sm mb-2')
                     ui.label('Choose the original image you want to modify.').classes('text-gray-600 text-sm mb-4')
                     
                     if not APP.project_manager or not APP.settings:
