@@ -1,6 +1,6 @@
 """Settings service for Book Creator.
 
-Handles API key storage (via Windows Credential Locker) and 
+Handles API key storage (via Windows Credential Locker) and
 application configuration (JSON file).
 """
 
@@ -46,14 +46,14 @@ class Settings:
 
     def __init__(self, config_path: Optional[Path] = None):
         """Initialize settings manager.
-        
+
         Args:
             config_path: Path to JSON config file. If None, uses default location.
         """
         self._config_path = config_path or self._get_default_config_path()
         self._config: dict = {}
         self._project_config: dict = {}
-        
+
         # Batch update flags
         self._batch_mode = False
         self._pending_save_project = False
@@ -82,6 +82,7 @@ class Settings:
     def _get_default_config_path() -> Path:
         """Get default config file path in user's app data directory."""
         import os
+
         app_data = Path(os.environ.get("APPDATA", Path.home() / ".config"))
         config_dir = app_data / APP_NAME
         config_dir.mkdir(parents=True, exist_ok=True)
@@ -154,7 +155,7 @@ class Settings:
 
     def get_api_key(self) -> Optional[str]:
         """Retrieve API key from Windows Credential Locker.
-        
+
         Returns:
             The stored API key, or None if not set.
         """
@@ -166,7 +167,7 @@ class Settings:
 
     def set_api_key(self, api_key: str) -> None:
         """Store API key in Windows Credential Locker.
-        
+
         Args:
             api_key: The Gemini API key to store.
         """
@@ -190,7 +191,7 @@ class Settings:
 
     def has_api_key(self) -> bool:
         """Check if an API key is stored.
-        
+
         Returns:
             True if an API key exists, False otherwise.
         """
@@ -207,7 +208,7 @@ class Settings:
     @working_folder.setter
     def working_folder(self, path: Path) -> None:
         """Set the working folder path and create directory structure.
-        
+
         Args:
             path: Path to the working folder.
         """
@@ -230,21 +231,25 @@ class Settings:
     @property
     def aspect_ratio(self) -> str:
         """Get the current aspect ratio setting."""
-        return self._project_config.get("aspect_ratio", self._config.get("aspect_ratio", DEFAULT_ASPECT_RATIO))
+        return self._project_config.get(
+            "aspect_ratio", self._config.get("aspect_ratio", DEFAULT_ASPECT_RATIO)
+        )
 
     @aspect_ratio.setter
     def aspect_ratio(self, ratio: str) -> None:
         """Set the aspect ratio.
-        
+
         Args:
             ratio: Aspect ratio string (e.g., "3:4", "16:9").
-        
+
         Raises:
             ValueError: If ratio is not in allowed values.
         """
         if ratio not in ASPECT_RATIOS:
-            raise ValueError(f"Invalid aspect ratio: {ratio}. Must be one of {ASPECT_RATIOS}")
-        
+            raise ValueError(
+                f"Invalid aspect ratio: {ratio}. Must be one of {ASPECT_RATIOS}"
+            )
+
         if self.working_folder:
             self._project_config["aspect_ratio"] = ratio
             self._save_project_config()
@@ -255,25 +260,30 @@ class Settings:
     @property
     def character_sheet_aspect_ratio(self) -> Optional[str]:
         """Get the current character sheet aspect ratio setting.
-        
+
         Returns:
             The aspect ratio string, or None if not set (meaning use page aspect ratio).
         """
-        return self._project_config.get("character_sheet_aspect_ratio", self._config.get("character_sheet_aspect_ratio"))
+        return self._project_config.get(
+            "character_sheet_aspect_ratio",
+            self._config.get("character_sheet_aspect_ratio"),
+        )
 
     @character_sheet_aspect_ratio.setter
     def character_sheet_aspect_ratio(self, ratio: Optional[str]) -> None:
         """Set the character sheet aspect ratio.
-        
+
         Args:
             ratio: Aspect ratio string (e.g., "3:4", "16:9") or None to unset.
-        
+
         Raises:
             ValueError: If ratio is not None and not in allowed values.
         """
         if ratio is not None and ratio not in ASPECT_RATIOS:
-            raise ValueError(f"Invalid aspect ratio: {ratio}. Must be one of {ASPECT_RATIOS} or None")
-        
+            raise ValueError(
+                f"Invalid aspect ratio: {ratio}. Must be one of {ASPECT_RATIOS} or None"
+            )
+
         if self.working_folder:
             if ratio is None:
                 self._project_config.pop("character_sheet_aspect_ratio", None)
@@ -292,12 +302,14 @@ class Settings:
     @property
     def style_prompt(self) -> str:
         """Get the overarching style prompt for the book."""
-        return self._project_config.get("style_prompt", self._config.get("style_prompt", ""))
+        return self._project_config.get(
+            "style_prompt", self._config.get("style_prompt", "")
+        )
 
     @style_prompt.setter
     def style_prompt(self, prompt: str) -> None:
         """Set the style prompt.
-        
+
         Args:
             prompt: The style description to prepend to all generation prompts.
         """
@@ -313,14 +325,16 @@ class Settings:
     @property
     def p_threshold(self) -> float:
         """Get the Top-P (nucleus sampling) value."""
-        return self._project_config.get("p_threshold", self._config.get("p_threshold", 0.95))
+        return self._project_config.get(
+            "p_threshold", self._config.get("p_threshold", 0.95)
+        )
 
     @p_threshold.setter
     def p_threshold(self, value: float) -> None:
         """Set the Top-P value."""
         if not (0.0 <= value <= 1.0):
-             raise ValueError("Top-P must be between 0.0 and 1.0")
-        
+            raise ValueError("Top-P must be between 0.0 and 1.0")
+
         if self.working_folder:
             self._project_config["p_threshold"] = value
             self._save_project_config()
@@ -331,13 +345,15 @@ class Settings:
     @property
     def temperature(self) -> float:
         """Get the temperature value."""
-        return self._project_config.get("temperature", self._config.get("temperature", 1.0))
+        return self._project_config.get(
+            "temperature", self._config.get("temperature", 1.0)
+        )
 
     @temperature.setter
     def temperature(self, value: float) -> None:
         """Set the temperature value."""
         if not (0.0 <= value <= 2.0):
-             raise ValueError("Temperature must be between 0.0 and 2.0")
+            raise ValueError("Temperature must be between 0.0 and 2.0")
 
         if self.working_folder:
             self._project_config["temperature"] = value
@@ -350,10 +366,10 @@ class Settings:
 
     def get_system_prompt_override(self, key: str) -> Optional[str]:
         """Get a project-specific system prompt override.
-        
+
         Args:
             key: The system prompt key (e.g., "character_sheet", "page").
-        
+
         Returns:
             The override prompt if set, or None to use default.
         """
@@ -366,17 +382,17 @@ class Settings:
 
     def set_system_prompt_override(self, key: str, prompt: Optional[str]) -> None:
         """Set a project-specific system prompt override.
-        
+
         Args:
             key: The system prompt key (e.g., "character_sheet", "page").
             prompt: The override prompt, or None/empty to clear the override.
         """
         if not self.working_folder:
             return
-        
+
         if "system_prompt_overrides" not in self._project_config:
             self._project_config["system_prompt_overrides"] = {}
-        
+
         if prompt and prompt.strip():
             self._project_config["system_prompt_overrides"][key] = prompt.strip()
         else:
@@ -385,12 +401,12 @@ class Settings:
             # Clean up empty dict
             if not self._project_config["system_prompt_overrides"]:
                 del self._project_config["system_prompt_overrides"]
-        
+
         self._save_project_config()
 
     def get_all_system_prompt_overrides(self) -> dict[str, str]:
         """Get all project-specific system prompt overrides.
-        
+
         Returns:
             Dictionary of key -> override prompt.
         """
@@ -403,7 +419,7 @@ class Settings:
         """Clear all system prompt overrides for this project."""
         if not self.working_folder:
             return
-        
+
         if "system_prompt_overrides" in self._project_config:
             del self._project_config["system_prompt_overrides"]
             self._save_project_config()
@@ -412,10 +428,10 @@ class Settings:
 
     def get_subfolder(self, name: str) -> Optional[Path]:
         """Get a subfolder path within the working folder.
-        
+
         Args:
             name: Subfolder name (e.g., "inputs", "references", "pages").
-        
+
         Returns:
             Full path to the subfolder, or None if working folder not set.
         """
@@ -429,7 +445,7 @@ class Settings:
 
     def is_configured(self) -> bool:
         """Check if the application is minimally configured.
-        
+
         Returns:
             True if API key and working folder are set.
         """
@@ -437,7 +453,7 @@ class Settings:
 
     def to_dict(self) -> dict:
         """Export current configuration as dictionary.
-        
+
         Returns:
             Dictionary with all non-sensitive settings.
         """
@@ -560,7 +576,7 @@ class Settings:
         if not usage.get("since"):
             usage["since"] = _utc_now_iso()
 
-        models = usage.get('models')
+        models = usage.get("models")
         if not isinstance(models, dict):
             models = {}
         model_usage = models.get(model)

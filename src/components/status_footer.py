@@ -20,10 +20,10 @@ class StatusFooter:
         self._tokens: list[str] = []
         self._messages: dict[str, str] = {}
 
-        with ui.footer().classes('bg-gray-100 w-full') as footer:
-            with ui.row().classes('w-full items-center justify-between px-4 py-1'):
-                self._label = ui.label('').classes('text-xs text-gray-600')
-                self._spinner = ui.spinner(size='sm').classes('text-gray-500')
+        with ui.footer().classes("bg-gray-100 w-full") as footer:
+            with ui.row().classes("w-full items-center justify-between px-4 py-1"):
+                self._label = ui.label("").classes("text-xs text-gray-600")
+                self._spinner = ui.spinner(size="sm").classes("text-gray-500")
 
         self._footer = footer
         self._footer.set_visibility(False)
@@ -35,7 +35,7 @@ class StatusFooter:
 
         self._footer.set_visibility(True)
         token = self._tokens[-1]
-        self._label.text = self._messages.get(token, 'Working...')
+        self._label.text = self._messages.get(token, "Working...")
 
     def start(self, message: str) -> str:
         """Show the footer with the given message.

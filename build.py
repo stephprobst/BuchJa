@@ -29,6 +29,16 @@ def run_command(command: str) -> None:
 def main():
     print("--- STARTING BUILD ---")
 
+    # 0. BADGE: Update coverage badge
+    #    This requires dev dependencies, so we sync them first.
+    print("\n--- STEP 0: Updating Coverage Badge ---")
+    run_command("uv sync")
+    print("Running tests... (Build will stop if tests fail)")
+    run_command("uv run python -m pytest --cov=src --cov-report=xml")
+    if not os.path.exists("badges"):
+        os.makedirs("badges")
+    run_command("uv run genbadge coverage -i coverage.xml -o badges/coverage.svg")
+
     # 1. CLEAN: Remove dev dependencies from environment
     #    This ensures pip-licenses only sees runtime dependencies.
     print("\n--- STEP 1: Stripping Dev Dependencies ---")
@@ -41,20 +51,22 @@ def main():
 
     # 3. GENERATE: Create the THIRD-PARTY-LICENSES.txt file
     print("\n--- STEP 3: Generating THIRD-PARTY-LICENSES.txt ---")
-    run_command((
-        'uv run --with pip-licenses pip-licenses '
-        '--from=mixed '
-        '--with-system '
-        '--with-urls '
-        '--with-license-file '
-        '--no-license-path '
-        '--output-file=THIRD-PARTY-LICENSES.txt '
-        '--ignore-packages pip-licenses PTable wcwidth prettytable'
-    ))
+    run_command(
+        (
+            "uv run --with pip-licenses pip-licenses "
+            "--from=mixed "
+            "--with-system "
+            "--with-urls "
+            "--with-license-file "
+            "--no-license-path "
+            "--output-file=THIRD-PARTY-LICENSES.txt "
+            "--ignore-packages pip-licenses PTable wcwidth prettytable"
+        )
+    )
 
     print("Appending verification timestamp...")
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
-    
+
     disclaimer_text = f"""
 
     
@@ -73,12 +85,11 @@ redistributed.
     with open("THIRD-PARTY-LICENSES.txt", "a", encoding="utf-8") as f:
         f.write(disclaimer_text)
 
-
     # --- FRONTEND LICENSES ---
     # These are JavaScript libraries bundled with NiceGUI or loaded dynamically.
     # Since they are not Python packages, pip-licenses cannot detect them.
     # We manually append their licenses here to ensure compliance.
-    
+
     js_licenses = """
 
 
@@ -190,7 +201,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-    
+
     with open("THIRD-PARTY-LICENSES.txt", "a", encoding="utf-8") as f:
         f.write(js_licenses)
 
@@ -200,14 +211,16 @@ THE SOFTWARE.
 
     # 5. BUILD: Create the executable using NiceGUI pack
     print("\n--- STEP 5: Building Windows Executable ---")
-    run_command((
-        'uv run nicegui-pack '
-        '--name "Book Creator" '
-        '--onefile '
-        '--windowed '
-        '--add-data "ai_config.json;." '
-        'src/main.py'
-    ))
+    run_command(
+        (
+            "uv run nicegui-pack "
+            '--name "Book Creator" '
+            "--onefile "
+            "--windowed "
+            '--add-data "ai_config.json;." '
+            "src/main.py"
+        )
+    )
 
     # 6. COPY LICENSE FILES: Place alongside executable
     print("\n--- STEP 6: Copying License Files to dist/ ---")
@@ -230,5 +243,7 @@ THE SOFTWARE.
     print("   ├── NOTICE.md")
     print("   ├── SECURITY.md")
     print("   └── THIRD-PARTY-LICENSES.txt")
+
+
 if __name__ == "__main__":
     main()

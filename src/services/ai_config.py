@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 
 class AIConfigError(Exception):
     """Raised when AI configuration cannot be loaded."""
+
     pass
 
 
 def _repo_root() -> Path:
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         # Running as PyInstaller bundle; sys._MEIPASS is the temp folder/internal dir
         return Path(sys._MEIPASS)
 
@@ -65,7 +66,9 @@ def load_ai_config(path: Optional[Path] = None) -> dict[str, Any]:
             raise AIConfigError(f"AI config must be a JSON object: {resolved}")
         return data
     except json.JSONDecodeError as exc:
-        raise AIConfigError(f"Invalid JSON in AI config file {resolved}: {exc}") from exc
+        raise AIConfigError(
+            f"Invalid JSON in AI config file {resolved}: {exc}"
+        ) from exc
 
 
 def get_model(name: str, *, config: Optional[dict[str, Any]] = None) -> str:
@@ -79,7 +82,9 @@ def get_model(name: str, *, config: Optional[dict[str, Any]] = None) -> str:
 
 def get_system_prompts(*, config: Optional[dict[str, Any]] = None) -> dict[str, str]:
     cfg = config or load_ai_config()
-    prompts = cfg.get("system_prompts") if isinstance(cfg.get("system_prompts"), dict) else {}
+    prompts = (
+        cfg.get("system_prompts") if isinstance(cfg.get("system_prompts"), dict) else {}
+    )
     result: dict[str, str] = {}
     for key, value in prompts.items():
         if isinstance(value, str):
@@ -97,7 +102,9 @@ def get_templates(*, config: Optional[dict[str, Any]] = None) -> dict[str, str]:
     return result
 
 
-def get_supported_models_for_usage_tracking(*, config: Optional[dict[str, Any]] = None) -> set[str]:
+def get_supported_models_for_usage_tracking(
+    *, config: Optional[dict[str, Any]] = None
+) -> set[str]:
     cfg = config or load_ai_config()
     raw = cfg.get("supported_models_for_usage_tracking")
     models: set[str] = set()

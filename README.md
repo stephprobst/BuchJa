@@ -1,5 +1,7 @@
 # Book Creator
 
+![Coverage Badge](badges/coverage.svg)
+
 A NiceGUI-based desktop application for creating illustrated books using Google's Gemini image generation API.
 
 ## Requirements
@@ -50,9 +52,10 @@ uv run book-creator
 uv run python -m pytest
 ```
 
-Run with coverage:
+Run with coverage and update badge:
 ```bash
-uv run python -m pytest --cov=src
+uv run python -m pytest --cov=src --cov-report=xml
+uv run genbadge coverage -i coverage.xml -o badges/coverage.svg
 ```
 
 ### Code Structure

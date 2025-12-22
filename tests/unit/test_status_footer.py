@@ -51,7 +51,7 @@ class _FakeSpinner:
 class _FakeUI:
     def __init__(self):
         self.footer_el = _FakeFooter()
-        self.label_el = _FakeLabel('')
+        self.label_el = _FakeLabel("")
 
     def footer(self):
         return self.footer_el
@@ -72,7 +72,7 @@ def test_status_footer_hidden_by_default(monkeypatch):
     from src.components import status_footer as mod
 
     fake_ui = _FakeUI()
-    monkeypatch.setattr(mod, 'ui', fake_ui)
+    monkeypatch.setattr(mod, "ui", fake_ui)
 
     footer = mod.StatusFooter()
     assert footer._footer.visible is False
@@ -84,13 +84,13 @@ def test_status_footer_start_and_end(monkeypatch):
     from src.components import status_footer as mod
 
     fake_ui = _FakeUI()
-    monkeypatch.setattr(mod, 'ui', fake_ui)
+    monkeypatch.setattr(mod, "ui", fake_ui)
 
     footer = mod.StatusFooter()
 
-    token = footer.start('Working...')
+    token = footer.start("Working...")
     assert footer._footer.visible is True
-    assert footer._label.text == 'Working...'
+    assert footer._label.text == "Working..."
 
     footer.end(token)
     assert footer._footer.visible is False
@@ -101,19 +101,19 @@ def test_status_footer_stack_behavior(monkeypatch):
     from src.components import status_footer as mod
 
     fake_ui = _FakeUI()
-    monkeypatch.setattr(mod, 'ui', fake_ui)
+    monkeypatch.setattr(mod, "ui", fake_ui)
 
     footer = mod.StatusFooter()
 
-    token_a = footer.start('Task A')
-    assert footer._label.text == 'Task A'
+    token_a = footer.start("Task A")
+    assert footer._label.text == "Task A"
 
-    token_b = footer.start('Task B')
-    assert footer._label.text == 'Task B'
+    token_b = footer.start("Task B")
+    assert footer._label.text == "Task B"
 
     footer.end(token_b)
     assert footer._footer.visible is True
-    assert footer._label.text == 'Task A'
+    assert footer._label.text == "Task A"
 
     footer.end(token_a)
     assert footer._footer.visible is False

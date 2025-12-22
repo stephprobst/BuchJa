@@ -44,13 +44,13 @@ def _modality_key(modality: Any) -> Optional[str]:
     if isinstance(modality, str):
         value = modality
     else:
-        value = getattr(modality, 'name', None) or str(modality)
+        value = getattr(modality, "name", None) or str(modality)
     value = value.lower()
     # Common forms: 'TEXT', 'IMAGE', 'Modality.TEXT', 'MODALITY_TEXT'
-    if 'text' in value:
-        return 'text'
-    if 'image' in value:
-        return 'image'
+    if "text" in value:
+        return "text"
+    if "image" in value:
+        return "image"
     return None
 
 
@@ -60,8 +60,8 @@ def _sum_tokens_details(tokens_details: Any) -> dict[str, int]:
     if not tokens_details:
         return totals
     for item in tokens_details:
-        modality = _modality_key(_get_attr(item, 'modality'))
-        token_count = _get_attr(item, 'token_count')
+        modality = _modality_key(_get_attr(item, "modality"))
+        token_count = _get_attr(item, "token_count")
         if modality is None or token_count is None:
             continue
         try:
@@ -71,7 +71,9 @@ def _sum_tokens_details(tokens_details: Any) -> dict[str, int]:
     return totals
 
 
-def extract_gemini_usage(response_or_chunk: Any, *, model: Optional[str] = None) -> GeminiUsage:
+def extract_gemini_usage(
+    response_or_chunk: Any, *, model: Optional[str] = None
+) -> GeminiUsage:
     """Extract token usage (and cost if available) from a Gemini SDK object.
 
     The Google Gen AI SDK exposes token counts on `usage_metadata`.
@@ -95,13 +97,12 @@ def extract_gemini_usage(response_or_chunk: Any, *, model: Optional[str] = None)
 
     total_tokens = _get_attr(usage, "total_token_count")
 
-    thoughts_tokens = _get_attr(usage, 'thoughts_token_count')
+    thoughts_tokens = _get_attr(usage, "thoughts_token_count")
 
-    prompt_details = _get_attr(usage, 'prompt_tokens_details')
+    prompt_details = _get_attr(usage, "prompt_tokens_details")
     # Output tokens details can be named differently.
-    output_details = (
-        _get_attr(usage, 'response_tokens_details')
-        or _get_attr(usage, 'candidates_tokens_details')
+    output_details = _get_attr(usage, "response_tokens_details") or _get_attr(
+        usage, "candidates_tokens_details"
     )
     prompt_modality_totals = _sum_tokens_details(prompt_details)
     output_modality_totals = _sum_tokens_details(output_details)
@@ -129,12 +130,25 @@ def extract_gemini_usage(response_or_chunk: Any, *, model: Optional[str] = None)
 
     # If total tokens isn't provided but prompt/output are, we can derive a total
     # without guessing any monetary amounts.
-    if total_tokens_i is None and prompt_tokens_i is not None and output_tokens_i is not None:
+    if (
+        total_tokens_i is None
+        and prompt_tokens_i is not None
+        and output_tokens_i is not None
+    ):
         total_tokens_i = prompt_tokens_i + output_tokens_i
 
-    if prompt_tokens_i is None and output_tokens_i is None and total_tokens_i is None and cost is None:
+    if (
+        prompt_tokens_i is None
+        and output_tokens_i is None
+        and total_tokens_i is None
+        and cost is None
+    ):
         # Still return modality/thinking if present.
-        if not prompt_modality_totals and not output_modality_totals and thoughts_tokens_i is None:
+        if (
+            not prompt_modality_totals
+            and not output_modality_totals
+            and thoughts_tokens_i is None
+        ):
             return GeminiUsage(model=model)
 
     return GeminiUsage(
@@ -142,10 +156,10 @@ def extract_gemini_usage(response_or_chunk: Any, *, model: Optional[str] = None)
         prompt_tokens=prompt_tokens_i,
         output_tokens=output_tokens_i,
         total_tokens=total_tokens_i,
-        prompt_text_tokens=prompt_modality_totals.get('text'),
-        prompt_image_tokens=prompt_modality_totals.get('image'),
-        output_text_tokens=output_modality_totals.get('text'),
-        output_image_tokens=output_modality_totals.get('image'),
+        prompt_text_tokens=prompt_modality_totals.get("text"),
+        prompt_image_tokens=prompt_modality_totals.get("image"),
+        output_text_tokens=output_modality_totals.get("text"),
+        output_image_tokens=output_modality_totals.get("image"),
         thoughts_tokens=thoughts_tokens_i,
         cost=cost,
     )

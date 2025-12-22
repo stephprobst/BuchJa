@@ -12,10 +12,15 @@ This module implements a vertical tab-based UI with five main sections:
 """
 
 import logging
-from nicegui import app, ui
+from nicegui import ui
 
 from src.app import APP, init_services, init_image_service
-from src.utils import start_folder_watcher, _usage_text, _usage_tooltip_text, _tooltip_html_from_text
+from src.utils import (
+    start_folder_watcher,
+    _usage_text,
+    _usage_tooltip_text,
+    _tooltip_html_from_text,
+)
 from src.components.status_footer import StatusFooter
 from src.tabs.settings import build_settings_tab
 from src.tabs.add import build_add_tab
@@ -32,11 +37,12 @@ logger = logging.getLogger(__name__)
 # Main Application
 # =============================================================================
 
-@ui.page('/')
+
+@ui.page("/")
 def main_page():
     """Main application page with vertical tab navigation."""
     # Add custom styles
-    ui.add_head_html('''
+    ui.add_head_html("""
         <style>
             .q-uploader__file {
                 background-size: contain !important;
@@ -56,25 +62,27 @@ def main_page():
                 padding: 12px 16px;
             }
         </style>
-    ''')
+    """)
 
     # Initialize services
     init_services()
     if init_image_service():
         start_folder_watcher()
-    
+
     # Header
-    with ui.header().classes('bg-primary'):
-        ui.label('📖 Book Creator').classes('text-2xl font-bold text-white')
-        ui.label('Create illustrated books with AI').classes('text-white opacity-80 ml-4 self-end mb-1')
+    with ui.header().classes("bg-primary"):
+        ui.label("📖 Book Creator").classes("text-2xl font-bold text-white")
+        ui.label("Create illustrated books with AI").classes(
+            "text-white opacity-80 ml-4 self-end mb-1"
+        )
         ui.space()
 
-        with ui.row().classes('items-center gap-4'):
+        with ui.row().classes("items-center gap-4"):
             tokens_text, since_text, cost_text, has_cost = _usage_text()
             total_only = tokens_text
 
-            usage_tokens_label = ui.label(total_only).classes('text-white')
-            usage_tokens_label._props['marker'] = 'gemini-usage-tokens'
+            usage_tokens_label = ui.label(total_only).classes("text-white")
+            usage_tokens_label._props["marker"] = "gemini-usage-tokens"
             with usage_tokens_label:
                 with ui.tooltip():
                     usage_tooltip_html = ui.html(
@@ -82,19 +90,23 @@ def main_page():
                         sanitize=False,
                     )
 
-            usage_since_label = ui.label(since_text).classes('text-white opacity-80 text-sm')
-            usage_since_label._props['marker'] = 'gemini-usage-since'
+            usage_since_label = ui.label(since_text).classes(
+                "text-white opacity-80 text-sm"
+            )
+            usage_since_label._props["marker"] = "gemini-usage-since"
 
-            usage_cost_label = ui.label(cost_text or '').classes('text-white')
-            usage_cost_label._props['marker'] = 'gemini-usage-cost'
+            usage_cost_label = ui.label(cost_text or "").classes("text-white")
+            usage_cost_label._props["marker"] = "gemini-usage-cost"
             usage_cost_label.set_visibility(has_cost)
 
             def refresh_usage_labels() -> None:
                 t, s, c, has = _usage_text()
                 usage_tokens_label.text = t
-                usage_tooltip_html.content = _tooltip_html_from_text(_usage_tooltip_text())
+                usage_tooltip_html.content = _tooltip_html_from_text(
+                    _usage_tooltip_text()
+                )
                 usage_since_label.text = s
-                usage_cost_label.text = c or ''
+                usage_cost_label.text = c or ""
                 usage_cost_label.set_visibility(has)
 
             def reset_usage() -> None:
@@ -103,57 +115,63 @@ def main_page():
                 APP.settings.reset_gemini_usage()
                 refresh_usage_labels()
 
-            reset_btn = ui.button(icon='restart_alt', on_click=reset_usage).props('flat dense round').classes('text-white')
-            reset_btn._props['marker'] = 'gemini-usage-reset-btn'
-            reset_btn.tooltip('Reset Gemini usage counters')
+            reset_btn = (
+                ui.button(icon="restart_alt", on_click=reset_usage)
+                .props("flat dense round")
+                .classes("text-white")
+            )
+            reset_btn._props["marker"] = "gemini-usage-reset-btn"
+            reset_btn.tooltip("Reset Gemini usage counters")
 
             ui.timer(1.0, refresh_usage_labels)
-    
+
     # Main content with vertical tabs
-    with ui.element('div').classes('flex w-full h-full'):
+    with ui.element("div").classes("flex w-full h-full"):
         # Vertical tabs on the left
-        with ui.element('div').classes('vertical-tabs'):
-            with ui.tabs().props('vertical').classes('bg-gray-100 h-full') as tabs:
-                instructions_tab = ui.tab('Instructions', icon='help')
-                instructions_tab._props['marker'] = 'tab-instructions'
-                settings_tab = ui.tab('Settings', icon='settings')
-                settings_tab._props['marker'] = 'tab-settings'
-                add_tab = ui.tab('Add', icon='add_photo_alternate')
-                add_tab._props['marker'] = 'tab-add'
-                crop_tab = ui.tab('Crop', icon='crop')
-                crop_tab._props['marker'] = 'tab-crop'
-                sketch_tab = ui.tab('Sketch', icon='brush')
-                sketch_tab._props['marker'] = 'tab-sketch'
-                generate_tab = ui.tab('Generate', icon='auto_awesome')
-                generate_tab._props['marker'] = 'tab-generate'
-                manage_tab = ui.tab('Manage', icon='folder')
-                manage_tab._props['marker'] = 'tab-manage'
-                export_tab = ui.tab('Export', icon='picture_as_pdf')
-                export_tab._props['marker'] = 'tab-export'
+        with ui.element("div").classes("vertical-tabs"):
+            with ui.tabs().props("vertical").classes("bg-gray-100 h-full") as tabs:
+                instructions_tab = ui.tab("Instructions", icon="help")
+                instructions_tab._props["marker"] = "tab-instructions"
+                settings_tab = ui.tab("Settings", icon="settings")
+                settings_tab._props["marker"] = "tab-settings"
+                add_tab = ui.tab("Add", icon="add_photo_alternate")
+                add_tab._props["marker"] = "tab-add"
+                crop_tab = ui.tab("Crop", icon="crop")
+                crop_tab._props["marker"] = "tab-crop"
+                sketch_tab = ui.tab("Sketch", icon="brush")
+                sketch_tab._props["marker"] = "tab-sketch"
+                generate_tab = ui.tab("Generate", icon="auto_awesome")
+                generate_tab._props["marker"] = "tab-generate"
+                manage_tab = ui.tab("Manage", icon="folder")
+                manage_tab._props["marker"] = "tab-manage"
+                export_tab = ui.tab("Export", icon="picture_as_pdf")
+                export_tab._props["marker"] = "tab-export"
 
             # Handle tab changes to warn about unsaved settings
-            current_tab = 'Instructions'
+            current_tab = "Instructions"
 
             # Create dialog once
             with ui.dialog() as dirty_dialog, ui.card():
-                ui.label('You have unsaved settings. Do you really want to leave?')
-                with ui.row().classes('w-full justify-end'):
-                    ui.button('Stay', on_click=lambda: dirty_dialog.submit('Stay'))
-                    ui.button('Leave', on_click=lambda: dirty_dialog.submit('Leave')).props('color=red')
+                ui.label("You have unsaved settings. Do you really want to leave?")
+                with ui.row().classes("w-full justify-end"):
+                    ui.button("Stay", on_click=lambda: dirty_dialog.submit("Stay"))
+                    ui.button(
+                        "Leave", on_click=lambda: dirty_dialog.submit("Leave")
+                    ).props("color=red")
 
             async def on_tab_change(e):
                 nonlocal current_tab
                 new_tab = e.value
-                
+
                 # If we are moving away from settings
-                if current_tab == 'Settings' and new_tab != 'Settings':
+                if current_tab == "Settings" and new_tab != "Settings":
                     if APP.check_settings_dirty and APP.check_settings_dirty():
                         # Revert immediately to prevent navigation
-                        tabs.value = 'Settings'
-                        
+                        tabs.value = "Settings"
+
                         dirty_dialog.open()
                         result = await dirty_dialog
-                        if result == 'Leave':
+                        if result == "Leave":
                             # User confirmed leaving, allow the change
                             current_tab = new_tab
                             tabs.value = new_tab
@@ -162,33 +180,37 @@ def main_page():
                 current_tab = new_tab
 
             tabs.on_value_change(on_tab_change)
-        
+
         # Tab panels on the right (with keep-alive for state preservation)
-        with ui.tab_panels(tabs, value=instructions_tab).props('keep-alive').classes('flex-1 overflow-auto'):
+        with (
+            ui.tab_panels(tabs, value=instructions_tab)
+            .props("keep-alive")
+            .classes("flex-1 overflow-auto")
+        ):
             with ui.tab_panel(instructions_tab):
                 build_instructions_tab()
 
             with ui.tab_panel(settings_tab):
                 build_settings_tab()
-            
+
             with ui.tab_panel(add_tab):
                 build_add_tab()
-            
+
             with ui.tab_panel(crop_tab):
                 build_crop_tab()
-            
+
             with ui.tab_panel(sketch_tab):
                 build_sketch_tab()
-            
+
             with ui.tab_panel(generate_tab):
                 build_generate_tab()
-            
+
             with ui.tab_panel(manage_tab):
                 build_manage_tab()
-            
+
             with ui.tab_panel(export_tab):
                 build_export_tab()
-    
+
     # Status footer
     APP.status_footer = StatusFooter()
 
@@ -196,12 +218,12 @@ def main_page():
 def main():
     """Application entry point."""
     ui.run(
-        title='Book Creator',
+        title="Book Creator",
         native=True,
         window_size=(1200, 800),
         reload=False,
     )
 
 
-if __name__ in {'__main__', '__mp_main__'}:
+if __name__ in {"__main__", "__mp_main__"}:
     main()

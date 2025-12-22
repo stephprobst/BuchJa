@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from src.services.ai_config import load_ai_config, AIConfigError, get_ai_config_path
+from src.services.ai_config import load_ai_config, AIConfigError
 
 
 REQUIRED_MODELS = ["image_generation"]
@@ -45,7 +45,9 @@ def test_ai_config_json_exists_and_is_valid() -> None:
     templates = data.get("templates", {})
     for template_key in REQUIRED_TEMPLATES:
         assert template_key in templates, f"Missing required template: {template_key}"
-        assert isinstance(templates[template_key], str) and templates[template_key].strip()
+        assert (
+            isinstance(templates[template_key], str) and templates[template_key].strip()
+        )
 
     # Check supported_models_for_usage_tracking exists
     tracking = data.get("supported_models_for_usage_tracking", [])
