@@ -1,5 +1,7 @@
 Version 0.1
 
+- Add processing queue for handling multiple generation requests
+
 - Clean up code
 - Rename project to avoid any brand issues
 
