@@ -29,9 +29,9 @@ def run_command(command: str) -> None:
 def main():
     print("--- STARTING BUILD ---")
 
-    # 0. BADGE: Update coverage badge
+    # 1. BADGE: Update coverage badge
     #    This requires dev dependencies, so we sync them first.
-    print("\n--- STEP 0: Updating Coverage Badge ---")
+    print("\n--- STEP 1: Updating Coverage Badge ---")
     run_command("uv sync")
     print("Running tests... (Build will stop if tests fail)")
     run_command("uv run python -m pytest --cov=src --cov-report=xml")
@@ -39,21 +39,23 @@ def main():
         os.makedirs("badges")
     run_command("uv run genbadge coverage -i coverage.xml -o badges/coverage.svg")
 
-    # 1. CLEAN: Remove dev dependencies from environment
+    # 2. CLEAN: Remove dev dependencies from environment
     #    This ensures pip-licenses only sees runtime dependencies.
-    print("\n--- STEP 1: Stripping Dev Dependencies ---")
+    print("\n--- STEP 2: Stripping Dev Dependencies ---")
     run_command("uv sync --no-dev")
 
-    # 2. AUDIT: Check for banned licenses (GPL, etc.)
+    # 3. AUDIT: Check for banned licenses (GPL, etc.)
     #    If this fails, the build stops immediately.
-    print("\n--- STEP 2: Checking License Compliance ---")
-    run_command('uv run --with pip-licenses pip-licenses --fail-on "GPL;LGPL;AGPL"')
+    print("\n--- STEP 3: Checking License Compliance ---")
+    run_command(
+        'uv run --no-dev --with pip-licenses pip-licenses --fail-on "GPL;LGPL;AGPL"'
+    )
 
-    # 3. GENERATE: Create the THIRD-PARTY-LICENSES.txt file
-    print("\n--- STEP 3: Generating THIRD-PARTY-LICENSES.txt ---")
+    # 4. GENERATE: Create the THIRD-PARTY-LICENSES.txt file
+    print("\n--- STEP 4: Generating THIRD-PARTY-LICENSES.txt ---")
     run_command(
         (
-            "uv run --with pip-licenses pip-licenses "
+            "uv run --no-dev --with pip-licenses pip-licenses "
             "--from=mixed "
             "--with-system "
             "--with-urls "
@@ -205,12 +207,12 @@ THE SOFTWARE.
     with open("THIRD-PARTY-LICENSES.txt", "a", encoding="utf-8") as f:
         f.write(js_licenses)
 
-    # 4. RESTORE: Bring back build tools (includes pyinstaller for nicegui-pack)
-    print("\n--- STEP 4: Restoring Build Tools ---")
+    # 5. RESTORE: Bring back build tools (includes pyinstaller for nicegui-pack)
+    print("\n--- STEP 5: Restoring Build Tools ---")
     run_command("uv sync --extra bundle")
 
-    # 5. BUILD: Create the executable using NiceGUI pack
-    print("\n--- STEP 5: Building Windows Executable ---")
+    # 6. BUILD: Create the executable using NiceGUI pack
+    print("\n--- STEP 6: Building Windows Executable ---")
     run_command(
         (
             "uv run nicegui-pack "
@@ -222,16 +224,16 @@ THE SOFTWARE.
         )
     )
 
-    # 6. COPY LICENSE FILES: Place alongside executable
-    print("\n--- STEP 6: Copying License Files to dist/ ---")
+    # 7. COPY LICENSE FILES: Place alongside executable
+    print("\n--- STEP 7: Copying License Files to dist/ ---")
     os.makedirs("dist", exist_ok=True)
     shutil.copy("LICENSE", "dist/LICENSE")
     shutil.copy("THIRD-PARTY-LICENSES.txt", "dist/THIRD-PARTY-LICENSES.txt")
     shutil.copy("NOTICE.md", "dist/NOTICE.md")
     shutil.copy("SECURITY.md", "dist/SECURITY.md")
 
-    # 7. CLEANUP: Remove PyInstaller artifacts
-    print("\n--- STEP 7: Cleaning Up ---")
+    # 8. CLEANUP: Remove PyInstaller artifacts
+    print("\n--- STEP 8: Cleaning Up ---")
     for spec_file in glob.glob("*.spec"):
         print(f"Removing {spec_file}")
         os.remove(spec_file)
