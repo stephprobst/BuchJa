@@ -296,6 +296,7 @@ class ImageManager:
         working_folder: Path,
         on_select: Optional[Callable[[str], None]] = None,
         image_service = None,
+        initial_tab: str = 'Pages',
     ):
         """Initialize the image manager UI.
         
@@ -304,6 +305,7 @@ class ImageManager:
             working_folder: Path to working folder.
             on_select: Callback when an image is selected.
             image_service: Optional ImageService instance for thumbnail generation.
+            initial_tab: Initial tab to display.
         """
         self._project = project_manager
         self._working_folder = working_folder
@@ -311,7 +313,7 @@ class ImageManager:
         self._image_service = image_service
         self._selected_ids: set[str] = set()
         self._container = None
-        self._current_tab = 'Pages'
+        self._current_tab = initial_tab
         
         # Preview dialog state
         self._preview_dialog = None
@@ -544,15 +546,15 @@ class ImageManager:
                             if cat != category:
                                 def move(c=cat, iid=image_id):
                                     self._project.move_image(iid, c)
-                                    self.refresh()
                                     ui.notify(f'Moved to {c}')
+                                    self.refresh()
                                 ui.menu_item(f'Move to {cat.title()}', on_click=move)
                 
                 # Delete
                 def delete(iid=image_id):
                     self._project.remove_image(iid)
-                    self.refresh()
                     ui.notify('Image removed')
+                    self.refresh()
                 
                 ui.button(icon='delete', on_click=delete).props('flat dense round size=sm color=negative').tooltip('Delete')
 

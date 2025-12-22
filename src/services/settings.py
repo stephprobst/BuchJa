@@ -9,6 +9,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from contextlib import contextmanager
 
 import keyring
 
@@ -52,9 +53,30 @@ class Settings:
         self._config_path = config_path or self._get_default_config_path()
         self._config: dict = {}
         self._project_config: dict = {}
+        
+        # Batch update flags
+        self._batch_mode = False
+        self._pending_save_project = False
+        self._pending_save_global = False
+
         self._load_config()
         if self.working_folder:
             self._load_project_config()
+
+    @contextmanager
+    def batch_updates(self):
+        """Context manager to batch multiple settings updates into a single save operation."""
+        self._batch_mode = True
+        try:
+            yield
+        finally:
+            self._batch_mode = False
+            if self._pending_save_project:
+                self._save_project_config()
+                self._pending_save_project = False
+            if self._pending_save_global:
+                self._save_config()
+                self._pending_save_global = False
 
     @staticmethod
     def _get_default_config_path() -> Path:
@@ -80,6 +102,10 @@ class Settings:
 
     def _save_config(self) -> None:
         """Save configuration to JSON file."""
+        if self._batch_mode:
+            self._pending_save_global = True
+            return
+
         try:
             self._config_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self._config_path, "w", encoding="utf-8") as f:
@@ -108,6 +134,10 @@ class Settings:
 
     def _save_project_config(self) -> None:
         """Save project-specific configuration to project.json in working folder."""
+        if self._batch_mode:
+            self._pending_save_project = True
+            return
+
         if not self.working_folder:
             return
 
