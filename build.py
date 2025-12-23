@@ -217,9 +217,13 @@ THE SOFTWARE.
         (
             "uv run nicegui-pack "
             '--name "BuchJa" '
-            "--onefile "
+            "--onedir "
+            "--noconfirm "
             "--windowed "
+            "--clean "
             '--add-data "ai_config.json;." '
+            '--add-data "src/materials;materials" '
+            '--icon "src/materials/logo.png" '
             "src/main.py"
         )
     )
@@ -227,10 +231,10 @@ THE SOFTWARE.
     # 7. COPY LICENSE FILES: Place alongside executable
     print("\n--- STEP 7: Copying License Files to dist/ ---")
     os.makedirs("dist", exist_ok=True)
-    shutil.copy("LICENSE", "dist/LICENSE")
-    shutil.copy("THIRD-PARTY-LICENSES.txt", "dist/THIRD-PARTY-LICENSES.txt")
-    shutil.copy("NOTICE.md", "dist/NOTICE.md")
-    shutil.copy("SECURITY.md", "dist/SECURITY.md")
+    shutil.copy("LICENSE", "dist/BuchJa/LICENSE")
+    shutil.copy("THIRD-PARTY-LICENSES.txt", "dist/BuchJa/THIRD-PARTY-LICENSES.txt")
+    shutil.copy("NOTICE.md", "dist/BuchJa/NOTICE.md")
+    shutil.copy("SECURITY.md", "dist/BuchJa/SECURITY.md")
 
     # 8. CLEANUP: Remove PyInstaller artifacts
     print("\n--- STEP 8: Cleaning Up ---")
@@ -239,8 +243,9 @@ THE SOFTWARE.
         os.remove(spec_file)
 
     print("\n✅ BUILD SUCCESSFUL!")
-    print("   dist/")
+    print("   dist/BuchJa/")
     print("   ├── BuchJa.exe")
+    print("   ├── _internal")
     print("   ├── LICENSE")
     print("   ├── NOTICE.md")
     print("   ├── SECURITY.md")

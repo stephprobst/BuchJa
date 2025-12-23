@@ -2,7 +2,8 @@
 
 import logging
 from nicegui import ui
-
+from nicegui import app
+from pathlib import Path
 from src.app import APP, init_services, init_image_service
 from src._utils import (
     start_folder_watcher,
@@ -21,6 +22,14 @@ from src.tabs.manage import build_manage_tab
 from src.tabs.export import build_export_tab
 
 logger = logging.getLogger(__name__)
+
+# Set native window icon (taskbar icon on Windows)
+# This must be at module level to be picked up by the subprocess on Windows
+logo_path = Path(__file__).parent / "materials" / "logo.png"
+if not logo_path.exists():
+    raise FileNotFoundError(f"Icon file not found: {logo_path}")
+
+app.native.start_args["icon"] = str(logo_path)
 
 
 @ui.page("/")
@@ -55,11 +64,13 @@ def main_page():
         start_folder_watcher()
 
     # Header
-    with ui.header().classes("bg-primary"):
-        ui.label("📖 BuchJa").classes("text-2xl font-bold text-white")
-        ui.label("Create illustrated books with AI").classes(
-            "text-white opacity-80 ml-4 self-end mb-1"
-        )
+    with ui.header().classes("bg-primary items-center"):
+        with ui.row().classes("items-center gap-2"):
+            ui.image(logo_path).classes("w-12 h-12")
+            ui.label("BuchJa").classes("text-2xl font-bold text-white")
+            ui.label("Create illustrated books with AI").classes(
+                "text-white opacity-80 ml-4"
+            )
         ui.space()
 
         with ui.row().classes("items-center gap-4"):
@@ -202,11 +213,13 @@ def main_page():
 
 def main():
     """Application entry point."""
+
     ui.run(
         title="BuchJa",
         native=True,
-        window_size=(1200, 800),
         reload=False,
+        favicon=logo_path,
+        window_size=(1200, 1000),
     )
 
 

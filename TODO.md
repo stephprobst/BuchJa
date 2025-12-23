@@ -9,7 +9,6 @@ Version 0.1
 - Test build and run on 2nd machine
 
 - Add proper Readme
-- Add logo
 - Intro Video
 
 - Go through project metadata, make sure it follows best practices
@@ -18,6 +17,7 @@ Version 0.1
 
 
 Version 0.2:
+- Code sign? MSI?
 - Add processing queue for handling multiple generation requests
 - End user testing feedback
 - Mac and Linux sup

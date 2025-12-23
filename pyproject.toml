@@ -7,7 +7,7 @@ name = "BuchJa"
 version = "0.1.0"
 description = "Create illustrated books with AI image generation"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11,<3.14"
 license = "MIT"
 authors = [{ name = "Stephan Probst" }]
 dependencies = [
