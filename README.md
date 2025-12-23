@@ -2,114 +2,45 @@
 
 ![Coverage Badge](badges/coverage.svg)
 
-A NiceGUI-based desktop application for creating illustrated books using Google's Gemini image generation API.
+BuchJa is a desktop app for creating illustrated books. It uses Google's Gemini API to generate images based on your prompts and sketches.
 
-## Requirements
+![BuchJa Screenshot](docs/screenshot.png)
 
-- Python 3.10 or higher
-- [uv](https://docs.astral.sh/uv/) package manager
+## Features
 
-## Installation
+*   **Generate Images**: Create illustrations from text prompts using Gemini.
+*   **Sketching**: Draw rough sketches to guide the image generation (Sketch-to-Image).
+*   **Manage**: Keep track of your generated images in the app.
+*   **Crop**: Crop images to specific aspect ratios.
+*   **Export**: Save your images to disk.
 
-### Install Dependencies
+## How to use
 
-**Runtime dependencies only:**
-```bash
-uv sync --no-dev
-```
+### Prerequisites
 
-**All dependencies (including dev tools for testing):**
-```bash
-uv sync
-```
+You need a **Google Gemini API Key**.
+*   Get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
+*   *Note: This might cost money depending on your usage.*
 
-**With build tools (for creating executables):**
-```bash
-uv sync --extra bundle
-```
+### Installation
 
-### Pinned Dependencies
+1.  Download the latest `BuchJa-vX.X.X.zip` from the [Releases](https://github.com/yourusername/BuchJa/releases) page.
+2.  Unzip it.
+3.  Run `BuchJa.exe`.
 
-All dependencies are pinned in `uv.lock`. The `uv sync` command automatically uses these pinned versions to ensure reproducible builds and license compliance.
+### Setup
 
-To update dependencies to their latest compatible versions:
-```bash
-uv lock --upgrade
-uv sync
-```
+1.  Open the app and go to the **Settings** tab.
+2.  Paste your API Key.
+3.  That's it.
 
-## Running the Application
+## License
 
-```bash
-uv run BuchJa
-```
+MIT License. See [LICENSE](LICENSE).
 
-## Development
+*   **Third-Party Licenses**: See `THIRD-PARTY-LICENSES.txt` in the download.
+*   **Security**: See [SECURITY.md](SECURITY.md).
 
-### Running Tests
+## Contributing
 
-```bash
-uv run python -m pytest
-```
-
-Run with coverage and update badge:
-```bash
-uv run python -m pytest --cov=src --cov-report=xml
-uv run genbadge coverage -i coverage.xml -o badges/coverage.svg
-```
-
-### Code Structure
-
-- `src/` - Main application source code
-  - `main.py` - Application entry point
-  - `components/` - UI components
-  - `services/` - Business logic and API services
-- `tests/` - Test suite
-  - `unit/` - Unit tests
-  - `integration/` - Integration tests
-
-## Building for Distribution
-
-### Build Windows Executable
-
-Run the build script:
-```bash
-uv run python build.py
-```
-
-This will:
-1. Strip dev dependencies to audit only runtime packages
-2. Check license compliance (fails on GPL/LGPL/AGPL)
-3. Generate `THIRD-PARTY-LICENSES.txt` with all dependency licenses
-4. Build a Windows executable using NiceGUI's pack feature and bundle it with the required markdown files.
-
-The executable will be created in the `dist/` folder.
-
-## License and Security Information
-
-### This Project
-
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for the full text. Also see the `NOTICE.md` file for additional licensing and attribution information as well as the `SECURITY.md` file for information on security practices.
-
-### Third-Party Dependencies
-
-License information for all dependencies is available in multiple places:
-
-| Location | Description |
-|----------|-------------|
-| `THIRD-PARTY-LICENSES.txt` | Generated during build, lists all runtime dependencies with licenses |
-| `uv.lock` | Contains package metadata including license info |
-| `pyproject.toml` | Lists direct dependencies |
-
-**In the distributed files:**
-
-The LICENSE file, the NOTICE.md file, the THIRD-PARTY-LICENSES.txt file and the SECURITY.md file are included in the root of the packaged application distribution.
-
-### License Compliance
-
-The build script automatically checks that no GPL, LGPL, or AGPL licensed packages are included in the runtime dependencies. This ensures the application can be distributed under the MIT license.
-
-To manually check license compliance:
-```bash
-uv run --with pip-licenses pip-licenses --fail-on "GPL;LGPL;AGPL"
-```
+Check out [CONTRIBUTING.md](CONTRIBUTING.md) if you want to build it from source or contribute.

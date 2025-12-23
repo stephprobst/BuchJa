@@ -14,7 +14,7 @@ Version 0.1
 - Go through project metadata, make sure it follows best practices
 - Remove GitHub Copilot agents and prompts and store them somewhere else
 - Final LICENSE check and review of README, NOTICE, SECURITY files
-
+- Activate security reporting
 
 Version 0.2:
 - Code sign? MSI?
