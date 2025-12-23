@@ -4,35 +4,59 @@
 
 BuchJa is a desktop app for creating illustrated books. It uses Google's Gemini API to generate images based on your prompts and sketches.
 
-![BuchJa Screenshot](docs/screenshot.png)
+![BuchJa Screenshot](docs/screenshot_generate.png)
 
-## Features
+## What can BuchJa do?
 
-*   **Generate Images**: Create illustrations from text prompts using Gemini.
-*   **Sketching**: Draw rough sketches to guide the image generation (Sketch-to-Image).
-*   **Manage**: Keep track of your generated images in the app.
-*   **Crop**: Crop images to specific aspect ratios.
-*   **Export**: Save your images to disk.
+*   **Generate Images**: Create illustrations from text prompts or reference images using Gemini.
+*   **Sketching**: Draw rough sketches to guide the composition of the generated images.
+*   **Manage**: Keep track of your generated images in the app, classifying them as references, pages or input material.
+*   **Crop**: Crop images to specific aspect ratios or to extract elements as new references for consistency in coming pages.
+*   **Export**: All images saved to disk. Export as PDF for easy sharing.
 
-## How to use
+## Can I use this for commercial projects?
+
+The main purpose of this app is to spread joy, eg to create personalized children's books for friends and family. However, the BuchJa application is MIT licensed, so there is nothing stopping you from using it commercially. But please note, thatthe images are generated using Google's Gemini API. Please refer to Google's Terms of Service and AI Principles for information on commercial use of generated content. Also consider the implications for artists and illustrators whose work may have been used to train the underlying models.
+
+## Why isn't this a Web App?
+
+To give you full control over your data and API keys. Obviously you're sending data to Google's servers for image generation, but BuchJa itself doesn't store anything online. Your API keys and generated images stay on your machine and under your control.
+
+I would have created an online service, but complying with GDPR and data privacy regulations is a pain, so a desktop app it is.
+
+## Does this run on my system?
+
+Currently we only support Windows 11. Mac and Linux support is planned for a future release.
+
+## How can I use BuchJa?
 
 ### Prerequisites
 
-You need a **Google Gemini API Key**.
-*   Get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
-*   *Note: This might cost money depending on your usage.*
+This is a _bring-your-own-key_ app. You need a Google Gemini API Key to run the image generation. You can get a key through the [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+> **WARNING & DISCLAIMER:** Usage of this application involves calls to Google's Gemini API, which may incur significant costs. You are solely responsible for monitoring and paying for your API usage. The token counter provided in the application is an estimate only and should not be relied upon for billing purposes. Always verify actual usage and costs via the Google Cloud Console or AI Studio. The authors of this software accept no liability for any costs, damages, or data loss incurred. By using this tool, you acknowledge that your data is processed by Google's services and is subject to their Terms of Service and Privacy Policy.
 
 ### Installation
 
-1.  Download the latest `BuchJa-vX.X.X.zip` from the [Releases](https://github.com/yourusername/BuchJa/releases) page.
+1.  Download the latest `BuchJa-vX.X.X.zip` from the [Releases](https://github.com/stephprobst/BuchJa/releases) page.
 2.  Unzip it.
 3.  Run `BuchJa.exe`.
 
-### Setup
+> **Note for Windows Users:** You might get a warning when running the executable for the first time. This is because it is not signed yet. You can safely ignore this warning. I will add code signing in a future release.
+
+### Getting started
 
 1.  Open the app and go to the **Settings** tab.
 2.  Paste your API Key.
-3.  That's it.
+3.  Set a style and aspect ratio for your book.
+4.  Add reference pictures to the app.
+5.  Start generating character sheets and book pages!
+
+There are more detailed instructions in the **Instructions** tab in the app. A tutorial video is planned.
+
+## I need additional features!
+
+Please open an issue on GitHub describing the feature you would like to see. I cannot promise to implement every request, but I will consider them carefully. Thank you for your feedback and interest in BuchJa!
 
 ## License
 

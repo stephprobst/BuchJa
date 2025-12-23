@@ -1,5 +1,7 @@
 # Contributing to BuchJa
 
+![Coverage Badge](badges/coverage.svg)
+
 Thank you for your interest in contributing to BuchJa! This document provides instructions for setting up your development environment, running tests, and building the application.
 
 ## Requirements
