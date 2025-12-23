@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from nicegui import ui
 from src.app import APP
-from src.utils import notify_error
+from src._utils import notify_error
 
 logger = logging.getLogger(__name__)
 

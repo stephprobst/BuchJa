@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from nicegui import ui
 from src.app import APP
-from src.utils import notify_error
+from src._utils import notify_error
 from src.components.sketch_canvas import SketchCanvas, save_sketch_to_file
 
 logger = logging.getLogger(__name__)

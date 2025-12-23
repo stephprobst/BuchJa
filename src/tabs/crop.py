@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime
 from nicegui import ui
 from src.app import APP
-from src.utils import notify_error, check_folder_changes
+from src._utils import notify_error, check_folder_changes
 from src.components.image_cropper import (
     ImageCropper,
     save_cropped_image,

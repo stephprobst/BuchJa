@@ -12,12 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class BuchJaApp:
-    """Holds application state and lifecycle helpers.
-
-    NiceGUI pages and callbacks run in an event-driven context; keeping state
-    in one object avoids scattered module-level globals and makes it easier to
-    reason about initialization and future testability.
-    """
+    """Holds application state and lifecycle helpers."""
 
     def __init__(self) -> None:
         self.settings: Optional[Settings] = None
@@ -33,7 +28,6 @@ class BuchJaApp:
 
         # Session state for tabs (preserved when switching)
         self.session_state: dict[str, Any] = {
-            # Generate tab state
             "generate_mode": "Create",  # 'Create' or 'Rework'
             "generate_type": "Page",  # 'Character Sheet' or 'Page'
             "generate_prompt": "",
@@ -41,7 +35,6 @@ class BuchJaApp:
             "selected_references": {},
             "selected_rework_image": None,
             "sketch_data_url": None,
-            # Add tab state
             "crop_source_image": None,
         }
 

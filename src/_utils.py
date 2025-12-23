@@ -60,7 +60,7 @@ def _format_since(iso: Optional[str]) -> str:
         return iso
 
 
-def _usage_text() -> tuple[str, str, Optional[str], bool]:
+def usage_text() -> tuple[str, str, Optional[str], bool]:
     """Return (tokens_text, since_text, cost_text, has_cost)."""
     if APP.settings is None:
         return ("Tokens: —", "Since: —", None, False)
@@ -79,7 +79,7 @@ def _usage_text() -> tuple[str, str, Optional[str], bool]:
     return (tokens_text, since_text, f"Cost: {cost}", True)
 
 
-def _usage_tooltip_text() -> str:
+def usage_tooltip_text() -> str:
     if APP.settings is None:
         return "Gemini usage is unavailable."
 
@@ -116,7 +116,7 @@ def _usage_tooltip_text() -> str:
     return "\n".join(lines).strip() or "Gemini usage is unavailable."
 
 
-def _tooltip_html_from_text(text: str) -> str:
+def tooltip_html_from_text(text: str) -> str:
     """Render tooltip text with reliable line breaks using HTML."""
     escaped = html.escape(text or "")
     rendered_lines: list[str] = []
@@ -131,14 +131,10 @@ def get_folder_hash(folder_path: Path) -> str:
     if not folder_path.exists():
         return ""
 
-    # Get all files, sort them to ensure consistent order
     files = sorted([f.name for f in folder_path.iterdir() if f.is_file()])
-
-    # Create a hash of the concatenated filenames
     hasher = hashlib.md5()
     for filename in files:
         hasher.update(filename.encode("utf-8"))
-
     return hasher.hexdigest()
 
 
@@ -189,11 +185,3 @@ def start_folder_watcher() -> None:
 
     APP.folder_watcher_timer = ui.timer(3.0, check_folder_changes)
     logger.info("Folder watcher started (3s interval)")
-
-
-def stop_folder_watcher() -> None:
-    """Stop the folder watcher timer."""
-    if APP.folder_watcher_timer:
-        APP.folder_watcher_timer.cancel()
-        APP.folder_watcher_timer = None
-        logger.info("Folder watcher stopped")

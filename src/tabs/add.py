@@ -1,6 +1,6 @@
 from nicegui import ui
 from src.app import APP
-from src.utils import check_folder_changes, notify_error
+from src._utils import check_folder_changes, notify_error
 
 
 def build_add_tab():

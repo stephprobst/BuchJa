@@ -1,7 +1,7 @@
 from pathlib import Path
 from nicegui import ui, app
 from src.app import APP, init_image_service
-from src.utils import start_folder_watcher
+from src._utils import start_folder_watcher
 from src.services.settings import ASPECT_RATIOS
 from src.services.image_service import SYSTEM_PROMPTS
 

@@ -1,9 +1,6 @@
 Version 0.1
 
-- Add processing queue for handling multiple generation requests
-
 - Clean up code
-- Rename project to avoid any brand issues
 
 - End to end test
 - Rework system prompts
@@ -21,6 +18,7 @@ Version 0.1
 
 
 Version 0.2:
+- Add processing queue for handling multiple generation requests
 - End user testing feedback
 - Mac and Linux sup
 - CI and build pipelin

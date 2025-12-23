@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 from nicegui import ui
 from src.app import APP
-from src.utils import notify_error
+from src._utils import notify_error
 from src.services.image_service import ImageGenerationError, SYSTEM_PROMPTS, TEMPLATES
 
 logger = logging.getLogger(__name__)

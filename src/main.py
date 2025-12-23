@@ -1,25 +1,14 @@
-"""BuchJa - Main Application Entry Point.
-
-A NiceGUI-based desktop application for creating illustrated books
-using Google's Gemini image generation API.
-
-This module implements a vertical tab-based UI with five main sections:
-- Settings: API configuration, working folder, aspect ratio, and style
-- Add: Upload references
-- Crop: Crop elements from existing images
-- Generate: Create new images or rework existing ones (character sheets/pages)
-- Manage: Organize images and export to PDF
-"""
+"""BuchJa - Main Application Entry Point."""
 
 import logging
 from nicegui import ui
 
 from src.app import APP, init_services, init_image_service
-from src.utils import (
+from src._utils import (
     start_folder_watcher,
-    _usage_text,
-    _usage_tooltip_text,
-    _tooltip_html_from_text,
+    usage_text,
+    usage_tooltip_text,
+    tooltip_html_from_text,
 )
 from src.components.status_footer import StatusFooter
 from src.tabs.settings import build_settings_tab
@@ -32,10 +21,6 @@ from src.tabs.manage import build_manage_tab
 from src.tabs.export import build_export_tab
 
 logger = logging.getLogger(__name__)
-
-# =============================================================================
-# Main Application
-# =============================================================================
 
 
 @ui.page("/")
@@ -78,7 +63,7 @@ def main_page():
         ui.space()
 
         with ui.row().classes("items-center gap-4"):
-            tokens_text, since_text, cost_text, has_cost = _usage_text()
+            tokens_text, since_text, cost_text, has_cost = usage_text()
             total_only = tokens_text
 
             usage_tokens_label = ui.label(total_only).classes("text-white")
@@ -86,7 +71,7 @@ def main_page():
             with usage_tokens_label:
                 with ui.tooltip():
                     usage_tooltip_html = ui.html(
-                        _tooltip_html_from_text(_usage_tooltip_text()),
+                        tooltip_html_from_text(usage_tooltip_text()),
                         sanitize=False,
                     )
 
@@ -100,10 +85,10 @@ def main_page():
             usage_cost_label.set_visibility(has_cost)
 
             def refresh_usage_labels() -> None:
-                t, s, c, has = _usage_text()
+                t, s, c, has = usage_text()
                 usage_tokens_label.text = t
-                usage_tooltip_html.content = _tooltip_html_from_text(
-                    _usage_tooltip_text()
+                usage_tooltip_html.content = tooltip_html_from_text(
+                    usage_tooltip_text()
                 )
                 usage_since_label.text = s
                 usage_cost_label.text = c or ""
