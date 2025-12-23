@@ -11,7 +11,7 @@ from src.services.logging_config import configure_logging
 logger = logging.getLogger(__name__)
 
 
-class BookCreatorApp:
+class BuchJaApp:
     """Holds application state and lifecycle helpers.
 
     NiceGUI pages and callbacks run in an event-driven context; keeping state
@@ -80,7 +80,7 @@ class BookCreatorApp:
         self.log_file = configure_logging(project_folder=project_folder)
 
 
-APP = BookCreatorApp()
+APP = BuchJaApp()
 
 
 def init_services():

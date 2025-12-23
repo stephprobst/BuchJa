@@ -1,4 +1,4 @@
-"""Settings service for Book Creator.
+"""Settings service for BuchJa.
 
 Handles API key storage (via Windows Credential Locker) and
 application configuration (JSON file).
@@ -18,7 +18,7 @@ from src.services.ai_config import get_supported_models_for_usage_tracking
 logger = logging.getLogger(__name__)
 
 # Constants
-APP_NAME = "book_creator"
+APP_NAME = "BuchJa"
 API_KEY_SERVICE = "gemini_api_key"
 DEFAULT_ASPECT_RATIO = "3:4"
 ASPECT_RATIOS = ["1:1", "3:4", "4:3", "16:9", "9:16"]

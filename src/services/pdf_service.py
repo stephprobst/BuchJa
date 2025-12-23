@@ -1,4 +1,4 @@
-"""PDF Export Service for Book Creator.
+"""PDF Export Service for BuchJa.
 
 Uses ReportLab (BSD license) to compile book pages into a PDF document.
 """
@@ -82,7 +82,7 @@ class PdfService:
         output_path: Path,
         aspect_ratio: str = "3:4",
         title: str = "My Book",
-        author: str = "Book Creator",
+        author: str = "BuchJa",
     ) -> Path:
         """Create a PDF from a list of page images.
 
@@ -115,7 +115,7 @@ class PdfService:
             # Set document metadata
             c.setTitle(title)
             c.setAuthor(author)
-            c.setCreator("Book Creator")
+            c.setCreator("BuchJa")
 
             # Add each page
             for i, image_path in enumerate(page_images):
@@ -170,7 +170,7 @@ class PdfService:
         output_path: Path,
         aspect_ratio: str = "3:4",
         title: str = "My Book",
-        author: str = "Book Creator",
+        author: str = "BuchJa",
     ) -> Path:
         """Create a PDF with a cover page.
 

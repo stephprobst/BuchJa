@@ -240,7 +240,7 @@ wheels = [
 ]
 
 [[package]]
-name = "book-creator"
+name = "BuchJa"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

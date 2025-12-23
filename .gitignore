@@ -141,6 +141,7 @@ cython_debug/
 *.swp
 *.swo
 *~
+.ruff_cache
 
 # OS
 .DS_Store

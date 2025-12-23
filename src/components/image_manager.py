@@ -1,4 +1,4 @@
-"""Image Manager component for Book Creator.
+"""Image Manager component for BuchJa.
 
 Provides UI for managing project images including:
 - Grid display with thumbnails

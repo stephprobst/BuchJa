@@ -3,7 +3,7 @@
 Centralizes Gemini model names and system prompts in a single JSON file.
 
 Default location: repository root `ai_config.json`.
-Override location: set env var `BOOK_CREATOR_AI_CONFIG` to a JSON file path.
+Override location: set env var `BuchJa_AI_CONFIG` to a JSON file path.
 
 The goal is to let prompts/models be edited without changing code.
 """
@@ -40,7 +40,7 @@ def get_ai_config_path(explicit_path: Optional[Path] = None) -> Path:
     if explicit_path is not None:
         return explicit_path
 
-    override = os.environ.get("BOOK_CREATOR_AI_CONFIG")
+    override = os.environ.get("BuchJa_AI_CONFIG")
     if override:
         return Path(override)
 

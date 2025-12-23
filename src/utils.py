@@ -36,7 +36,7 @@ def notify_error(message: str, exception: Optional[Exception] = None) -> None:
         ui.label("For more details, check the logs at:").classes(
             "text-caption font-bold"
         )
-        log_path = APP.log_file if APP.log_file else "logs/book_creator.log"
+        log_path = APP.log_file if APP.log_file else "logs/BuchJa.log"
         ui.label(str(log_path)).classes(
             "text-caption text-grey break-all font-mono bg-gray-100 p-1 rounded"
         )

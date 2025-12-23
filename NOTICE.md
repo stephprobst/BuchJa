@@ -1,6 +1,6 @@
 # NOTICE AND ATTRIBUTIONS
 
-Product: book-creator
+Product: BuchJa
 Copyright (c) 2025 Stephan Probst
 
 ## 1. Third-Party Software

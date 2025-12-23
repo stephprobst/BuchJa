@@ -1,4 +1,4 @@
-# Book Creator
+# BuchJa
 
 ![Coverage Badge](badges/coverage.svg)
 
@@ -41,7 +41,7 @@ uv sync
 ## Running the Application
 
 ```bash
-uv run book-creator
+uv run BuchJa
 ```
 
 ## Development

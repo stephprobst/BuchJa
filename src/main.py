@@ -1,4 +1,4 @@
-"""Book Creator - Main Application Entry Point.
+"""BuchJa - Main Application Entry Point.
 
 A NiceGUI-based desktop application for creating illustrated books
 using Google's Gemini image generation API.
@@ -71,7 +71,7 @@ def main_page():
 
     # Header
     with ui.header().classes("bg-primary"):
-        ui.label("📖 Book Creator").classes("text-2xl font-bold text-white")
+        ui.label("📖 BuchJa").classes("text-2xl font-bold text-white")
         ui.label("Create illustrated books with AI").classes(
             "text-white opacity-80 ml-4 self-end mb-1"
         )
@@ -218,7 +218,7 @@ def main_page():
 def main():
     """Application entry point."""
     ui.run(
-        title="Book Creator",
+        title="BuchJa",
         native=True,
         window_size=(1200, 800),
         reload=False,

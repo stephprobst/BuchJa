@@ -5,7 +5,7 @@ def build_instructions_tab():
     """Build the Instructions tab content."""
     with ui.column().classes("w-full gap-6 p-4 max-w-4xl"):
         with ui.card().classes("w-full"):
-            ui.label("Welcome to Book Creator").classes("text-2xl font-bold mb-4")
+            ui.label("Welcome to BuchJa").classes("text-2xl font-bold mb-4")
             ui.label(
                 "This application helps you create illustrated books using AI. Follow the steps below to get started."
             ).classes("text-gray-700 mb-4")

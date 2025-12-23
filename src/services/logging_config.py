@@ -1,4 +1,4 @@
-"""Logging configuration for Book Creator.
+"""Logging configuration for BuchJa.
 
 Provides a single entry point to configure logging consistently across the app.
 
@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 
-DEFAULT_LOG_FILENAME = "book_creator.log"
+DEFAULT_LOG_FILENAME = "BuchJa.log"
 
 
 def configure_logging(

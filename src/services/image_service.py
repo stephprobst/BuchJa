@@ -1,4 +1,4 @@
-"""Image generation service for Book Creator.
+"""Image generation service for BuchJa.
 
 Wraps the Gemini API for image generation with support for:
 - Text-to-image generation

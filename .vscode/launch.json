@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Book Creator: Debug",
+            "name": "BuchJa: Debug",
             "type": "debugpy",
             "request": "launch",
             "module": "src.main",
@@ -11,7 +11,7 @@
             "justMyCode": true
         },
         {
-            "name": "Book Creator: Debug (All Code)",
+            "name": "BuchJa: Debug (All Code)",
             "type": "debugpy",
             "request": "launch",
             "module": "src.main",

@@ -236,7 +236,7 @@ class TestHeaderUI:
         """Test that app title is visible."""
         await user.open("/")
 
-        await user.should_see("Book Creator")
+        await user.should_see("BuchJa")
 
     async def test_usage_tokens_visible(self, user: User):
         """Test that usage tokens label is visible."""

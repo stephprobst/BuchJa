@@ -1,4 +1,4 @@
-"""Build script for Book Creator application.
+"""Build script for BuchJa application.
 
 This script handles:
 1. License compliance checking (fails on GPL/LGPL/AGPL)
@@ -216,7 +216,7 @@ THE SOFTWARE.
     run_command(
         (
             "uv run nicegui-pack "
-            '--name "Book Creator" '
+            '--name "BuchJa" '
             "--onefile "
             "--windowed "
             '--add-data "ai_config.json;." '
@@ -240,7 +240,7 @@ THE SOFTWARE.
 
     print("\n✅ BUILD SUCCESSFUL!")
     print("   dist/")
-    print("   ├── Book Creator.exe")
+    print("   ├── BuchJa.exe")
     print("   ├── LICENSE")
     print("   ├── NOTICE.md")
     print("   ├── SECURITY.md")

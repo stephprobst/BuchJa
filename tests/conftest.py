@@ -1,4 +1,4 @@
-"""Pytest configuration and shared fixtures for Book Creator tests.
+"""Pytest configuration and shared fixtures for BuchJa tests.
 
 All tests mock external APIs (Gemini) to avoid token usage and costs.
 """
