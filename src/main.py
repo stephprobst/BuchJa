@@ -1,5 +1,16 @@
 """BuchJa - Main Application Entry Point."""
 
+import sys
+import os
+
+# Workaround: Redirect stdout/stderr to devnull if running in windowed mode (no console)
+# This prevents "Invalid Handle" crashes when libraries try to print logs.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
+
 import logging
 from nicegui import ui
 from nicegui import app

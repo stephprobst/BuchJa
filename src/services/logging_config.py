@@ -39,7 +39,23 @@ def configure_logging(
     """
     resolved_project = (project_folder or Path.cwd()).resolve()
     log_dir = resolved_project / "logs"
-    log_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        # Test write permission
+        test_file = log_dir / ".test_write"
+        test_file.touch()
+        test_file.unlink()
+    except (PermissionError, OSError):
+        # Fallback to user's home directory if we can't write to the project folder
+        # This happens when installed in Program Files or running from a read-only location
+        log_dir = Path.home() / ".BuchJa" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        print(
+            f"⚠️  Could not write to project folder. Logging to: {log_dir}",
+            file=sys.stderr,
+        )
+
     log_file = log_dir / DEFAULT_LOG_FILENAME
 
     root = logging.getLogger()

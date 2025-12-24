@@ -219,7 +219,7 @@ THE SOFTWARE.
             '--name "BuchJa" '
             "--onedir "
             "--noconfirm "
-            "--windowed "
+            "--windowed "  # Comment out for debugging startup issues
             "--clean "
             '--add-data "ai_config.json;." '
             '--add-data "src/materials;materials" '
