@@ -225,6 +225,14 @@ def main_page():
 def main():
     """Application entry point."""
 
+    try:
+        import pyi_splash  # Cannot be resolved as included during bundling from pyinstaller.
+
+        pyi_splash.update_text("Buch Jaaaa. Buch gut! Buch Ja!")
+        pyi_splash.close()
+    except ImportError:
+        pass
+
     ui.run(
         title="BuchJa",
         native=True,

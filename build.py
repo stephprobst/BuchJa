@@ -3,7 +3,7 @@
 This script handles:
 1. License compliance checking (fails on GPL/LGPL/AGPL)
 2. THIRD-PARTY-LICENSES.txt generation for bundled dependencies
-3. Building Windows executable using NiceGUI's pack feature
+3. Building Windows executable using PyInstaller
 
 Requires: uv (https://docs.astral.sh/uv/)
 """
@@ -207,20 +207,21 @@ THE SOFTWARE.
     with open("THIRD-PARTY-LICENSES.txt", "a", encoding="utf-8") as f:
         f.write(js_licenses)
 
-    # 5. RESTORE: Bring back build tools (includes pyinstaller for nicegui-pack)
+    # 5. RESTORE: Bring back build tools (includes pyinstaller)
     print("\n--- STEP 5: Restoring Build Tools ---")
     run_command("uv sync --extra bundle")
 
-    # 6. BUILD: Create the executable using NiceGUI pack
+    # 6. BUILD: Create the executable using PyInstaller
     print("\n--- STEP 6: Building Windows Executable ---")
     run_command(
         (
-            "uv run nicegui-pack "
+            "uv run pyinstaller "
             '--name "BuchJa" '
             "--onedir "
             "--noconfirm "
             "--windowed "  # Comment out for debugging startup issues
             "--clean "
+            '--splash "src/materials/splash.jpeg" '
             '--add-data "ai_config.json;." '
             '--add-data "src/materials;materials" '
             '--icon "src/materials/logo.png" '

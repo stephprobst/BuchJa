@@ -42,7 +42,7 @@ This is a _bring-your-own-key_ app. You need a Google Gemini API Key to run the 
 2.  Unzip it.
 3.  Run `BuchJa.exe`.
 
-> **Note for Windows Users:** You might get a warning when running the executable for the first time. This is because it is not signed yet. You can safely ignore this warning. I will add code signing in a future release.
+> **Note for Windows Users:** You might get a warning when running the executable for the first time. This is normal for unsigned applications on Windows. The application is new and not widely used yet, so Windows Defender flags it as "Unknown". I'm currently looking into setting up a code signing certificate for future releases.
 
 ### Getting started
 
@@ -57,6 +57,10 @@ There are more detailed instructions in the **Instructions** tab in the app. A t
 ## I need additional features!
 
 Please open an issue on GitHub describing the feature you would like to see. I cannot promise to implement every request, but I will consider them carefully. Thank you for your feedback and interest in BuchJa!
+
+## Do you support other Models than Gemini?
+
+Not at the moment. Gemini is currently the only model supported. Support for additional models may be added in future releases.
 
 ## License
 

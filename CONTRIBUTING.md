@@ -69,7 +69,7 @@ This will:
 1. Strip dev dependencies to audit only runtime packages
 2. Check license compliance (fails on GPL/LGPL/AGPL)
 3. Generate `THIRD-PARTY-LICENSES.txt` with all dependency licenses
-4. Build a Windows executable using NiceGUI's pack feature and bundle it with the required markdown files.
+4. Build a Windows executable using PyInstaller and bundle it with the required markdown files.
 
 The executable will be created in the `dist/` folder.
 

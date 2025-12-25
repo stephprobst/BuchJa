@@ -268,9 +268,9 @@ def build_generate_tab():
         with ui.card().classes("w-full"):
             with ui.row().classes("w-full items-center justify-between"):
                 ui.label("Select References").classes("text-lg font-bold")
-                show_all_types = ui.switch("Show pages and inputs", value=False).props(
-                    "dense"
-                )
+                with ui.row().classes("gap-4"):
+                    show_inputs = ui.switch("Show inputs", value=True).props("dense")
+                    show_pages = ui.switch("Show pages", value=False).props("dense")
 
             refs_grid = ui.element("div").classes("w-full")
 
@@ -284,13 +284,13 @@ def build_generate_tab():
                         return
 
                     # Show references, inputs, and pages
-                    references = APP.project_manager.get_images("references")
-                    if show_all_types.value:
-                        inputs = APP.project_manager.get_images("inputs")
-                        pages = APP.project_manager.get_images("pages")
-                        all_refs = references + inputs + pages
-                    else:
-                        all_refs = references
+                    all_refs = APP.project_manager.get_images("references")
+
+                    if show_inputs.value:
+                        all_refs.extend(APP.project_manager.get_images("inputs"))
+
+                    if show_pages.value:
+                        all_refs.extend(APP.project_manager.get_images("pages"))
 
                     if not all_refs:
                         ui.label("No images available.").classes(
@@ -374,7 +374,8 @@ def build_generate_tab():
 
             build_refs_grid()
             update_selected_refs_display()
-            show_all_types.on("update:model-value", build_refs_grid)
+            show_inputs.on("update:model-value", build_refs_grid)
+            show_pages.on("update:model-value", build_refs_grid)
 
             ui.button("↻ Refresh", on_click=build_refs_grid).props(
                 "flat dense"
