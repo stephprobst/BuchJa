@@ -225,6 +225,12 @@ THE SOFTWARE.
             '--add-data "ai_config.json;." '
             '--add-data "src/materials;materials" '
             '--icon "src/materials/logo.png" '
+            # Hidden imports for pywebview native mode
+            "--hidden-import=clr "
+            "--hidden-import=pythoncom "
+            "--hidden-import=win32com "
+            "--hidden-import=webview "
+            "--collect-all=webview "
             "src/main.py"
         )
     )
