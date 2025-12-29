@@ -291,6 +291,25 @@ def main():
     # Dynamic Port Selection to prevent conflicts
     port = _find_free_port()
 
+    def shutdown():
+        """Ensure clean shutdown of the application."""
+        logger.info("Shutting down application...")
+
+        # Stop folder watcher if running
+        if APP.folder_watcher_timer:
+            try:
+                APP.folder_watcher_timer.cancel()
+            except Exception:
+                pass
+
+        # Force exit to prevent zombie processes
+        # This is crucial for the native window mode
+        import os
+
+        os._exit(0)
+
+    app.on_shutdown(shutdown)
+
     ui.run(
         title="BuchJa",
         native=native_mode,
