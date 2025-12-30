@@ -373,6 +373,10 @@ def main():
 
     app.on_shutdown(shutdown)
 
+    # If in browser mode (fallback), shut down when the client disconnects (tab closed)
+    if not native_mode:
+        app.on_disconnect(app.shutdown)
+
     ui.run(
         title="BuchJa",
         native=native_mode,
