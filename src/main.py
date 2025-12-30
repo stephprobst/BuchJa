@@ -286,6 +286,36 @@ def main_page():
     APP.status_footer = StatusFooter()
 
 
+def _check_dotnet_framework_available() -> bool:
+    """Check if .NET Framework 4.6.1+ is available (required for pythonnet/clr).
+    
+    The pywebview library uses pythonnet/clr to create a native Windows window.
+    pythonnet requires .NET Framework 4.6.1 or later to run Python.Runtime.dll.
+    """
+    if sys.platform != "win32":
+        return True
+    
+    try:
+        import winreg
+        # Check for .NET Framework 4.6.1+ (release key >= 394254)
+        key_path = r"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
+            release, _ = winreg.QueryValueEx(key, "Release")
+            # 394254 = .NET Framework 4.6.1
+            # 528040 = .NET Framework 4.8 (Windows 10 May 2019 Update)
+            if release >= 394254:
+                return True
+            else:
+                logger.warning(f".NET Framework release {release} is too old (need >= 394254 for 4.6.1+)")
+                return False
+    except FileNotFoundError:
+        logger.warning(".NET Framework 4.6.1+ not found in registry")
+        return False
+    except Exception as e:
+        logger.warning(f"Error checking .NET Framework: {e}")
+        return True  # Assume available if we can't check
+
+
 def _check_webview2_available() -> bool:
     """Check if Microsoft Edge WebView2 Runtime is available on Windows."""
     if sys.platform != "win32":
@@ -347,9 +377,13 @@ def main():
 
     # Check if WebView2 is available for native mode
     native_mode = True
-    if getattr(sys, "frozen", False) and not _check_webview2_available():
-        logger.warning("WebView2 Runtime not found, falling back to browser mode")
-        native_mode = False
+    if getattr(sys, "frozen", False):
+        if not _check_dotnet_framework_available():
+            logger.warning(".NET Framework 4.6.1+ not found, falling back to browser mode")
+            native_mode = False
+        elif not _check_webview2_available():
+            logger.warning("WebView2 Runtime not found, falling back to browser mode")
+            native_mode = False
 
     # Dynamic Port Selection to prevent conflicts
     port = _find_free_port()
