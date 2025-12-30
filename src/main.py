@@ -324,7 +324,7 @@ def _check_webview2_available() -> bool:
 def _find_free_port() -> int:
     """Find a free port on localhost."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
+        s.bind(("127.0.0.1", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
 
@@ -383,6 +383,7 @@ def main():
         reload=False,
         favicon=logo_path,
         window_size=(1200, 1000),
+        host="127.0.0.1",
         port=port,
     )
 
