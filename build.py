@@ -251,7 +251,7 @@ THE SOFTWARE.
         '--add-data "ai_config.json;." '
         '--add-data "src/materials;materials" '
         '--icon "src/materials/logo.png" '
-        "--runtime-hook=src/hook-pythonnet_runtime.py "
+        # Hidden imports for pywebview native mode
         "--hidden-import=clr "
         "--hidden-import=webview "
         "--collect-all=webview "
