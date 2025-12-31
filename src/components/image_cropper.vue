@@ -107,9 +107,20 @@ export default {
     },
     
     loadImage(src) {
+      // Destroy existing cropper first
       this.destroyCropper();
-      this.imageSrc = src;
-      this.imageLoaded = false;
+      
+      // If loading the same image, force a reload by clearing first
+      if (this.imageSrc === src) {
+        this.imageSrc = null;
+        this.imageLoaded = false;
+        this.$nextTick(() => {
+          this.imageSrc = src;
+        });
+      } else {
+        this.imageSrc = src;
+        this.imageLoaded = false;
+      }
     },
     
     onImageLoad() {
@@ -120,7 +131,10 @@ export default {
     },
     
     initCropper() {
-      if (!this.$refs.imageEl || this.cropper) return;
+      // Only check for imageEl - cropper should be null after destroyCropper
+      if (!this.$refs.imageEl) return;
+      // Don't reinitialize if already exists
+      if (this.cropper) return;
       
       const aspectRatio = this.parseAspectRatio(this.aspectRatioOption);
       
@@ -135,7 +149,7 @@ export default {
         highlight: true,
         cropBoxMovable: true,
         cropBoxResizable: true,
-        toggleDragModeOnDblclick: true,
+        toggleDragModeOnDblclick: false,
         responsive: true,
       });
     },
