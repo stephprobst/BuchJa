@@ -119,15 +119,6 @@ def main_page():
 
             ui.separator().props("vertical").classes("mx-2")
 
-            # Status Indicator
-            with ui.row().classes(
-                "items-center gap-2 border border-white/30 rounded px-2 py-1"
-            ):
-                ui.icon("fiber_manual_record", color="green-400").classes("text-xs")
-                ui.label("Active").classes("text-xs text-white font-bold")
-
-            ui.separator().props("vertical").classes("mx-2")
-
             # Shutdown Dialog
             with ui.dialog() as shutdown_dialog, ui.card().classes("w-80"):
                 with ui.column().classes("w-full items-center text-center gap-4"):
