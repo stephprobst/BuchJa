@@ -72,7 +72,22 @@ def build_settings_tab():
                         # Remove quotes if user pasted them
                         path_str = path_str.strip('"').strip("'")
 
+                        # Validate path format
+                        if any(char in path_str for char in '<>"|?*'):
+                            ui.notify(
+                                'Path contains invalid characters (<, >, ", |, ?, *)',
+                                type="negative",
+                            )
+                            return
+
                         folder_path = Path(path_str)
+
+                        if not folder_path.is_absolute():
+                            ui.notify(
+                                "Please enter an absolute path (e.g. C:/...)",
+                                type="negative",
+                            )
+                            return
 
                         if not folder_path.exists():
                             try:
