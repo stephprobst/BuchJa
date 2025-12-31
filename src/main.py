@@ -266,13 +266,13 @@ def main():
                                        
     """
     )
-    print(f"Buch gut! Ja! Buch sehr gut! \n")
+    print("Buch gut! Ja! Buch sehr gut! \n")
 
     print("#" * 50)
     print(" CLICK HERE TO OPEN APP IN YOUR BROWSER:")
     print(f" {url}")
     print("#" * 50)
-    print(" CLOSING THIS WINDOW WILL NOT CLOSE THE APP.")
+    print(" CLOSING THIS WINDOW WILL SHUT DOWN THE APP.")
     print("#" * 50)
     print("\n")
 
