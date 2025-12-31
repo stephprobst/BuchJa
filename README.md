@@ -2,7 +2,7 @@
 
 ![Coverage Badge](badges/coverage.svg)
 
-BuchJa is a desktop app for creating illustrated books. It uses Google's Gemini API to generate images based on your prompts and sketches.
+BuchJa is a locally hosted, browser-based application for creating illustrated books. It uses Google's Gemini API to generate images from your prompts and sketches.
 
 ![BuchJa Screenshot](docs/screenshot_generate.png)
 
