@@ -1,19 +1,9 @@
 """BuchJa - Main Application Entry Point."""
 
-import sys
-import os
-
-# Workaround: Redirect stdout/stderr to devnull if running in windowed mode (no console)
-# This prevents "Invalid Handle" crashes when libraries try to print logs.
-if sys.stdout is None:
-    sys.stdout = open(os.devnull, "w")
-if sys.stderr is None:
-    sys.stderr = open(os.devnull, "w")
-
-
 import logging
+import asyncio
+import socket
 from nicegui import ui
-from nicegui import app
 from pathlib import Path
 from src.app import APP, init_services, init_image_service
 from src._utils import (
@@ -34,13 +24,10 @@ from src.tabs.export import build_export_tab
 
 logger = logging.getLogger(__name__)
 
-# Set native window icon (taskbar icon on Windows)
-# This must be at module level to be picked up by the subprocess on Windows
+# Set window icon (browser tab icon)
 logo_path = Path(__file__).parent / "materials" / "logo.png"
 if not logo_path.exists():
     raise FileNotFoundError(f"Icon file not found: {logo_path}")
-
-app.native.start_args["icon"] = str(logo_path)
 
 
 @ui.page("/")
@@ -129,6 +116,37 @@ def main_page():
             )
             reset_btn._props["marker"] = "gemini-usage-reset-btn"
             reset_btn.tooltip("Reset Gemini usage counters")
+
+            ui.separator().props("vertical").classes("mx-2")
+
+            # Status Indicator
+            with ui.row().classes(
+                "items-center gap-2 border border-white/30 rounded px-2 py-1"
+            ):
+                ui.icon("fiber_manual_record", color="green-400").classes("text-xs")
+                ui.label("Active").classes("text-xs text-white font-bold")
+
+            ui.separator().props("vertical").classes("mx-2")
+
+            # Shutdown Dialog
+            with ui.dialog() as shutdown_dialog, ui.card().classes("w-80"):
+                with ui.column().classes("w-full items-center text-center gap-4"):
+                    ui.icon("check_circle", color="positive").classes("text-6xl")
+                    ui.label("Shutdown Complete").classes("text-h6")
+                    ui.label(
+                        "The application has been stopped.\nYou can now close this browser tab."
+                    ).classes("text-gray-600")
+
+            async def shutdown_app():
+                shutdown_dialog.open()
+                shutdown_dialog.props("persistent")
+                await asyncio.sleep(0.5)
+                APP.shutdown()
+
+            # Shutdown button
+            ui.button(icon="power_settings_new", on_click=shutdown_app).props(
+                "flat round dense color=white"
+            ).tooltip("Shutdown Application")
 
             ui.timer(1.0, refresh_usage_labels)
 
@@ -222,23 +240,50 @@ def main_page():
     APP.status_footer = StatusFooter()
 
 
+def _find_free_port() -> int:
+    """Find a free port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
 def main():
     """Application entry point."""
 
-    try:
-        import pyi_splash  # Cannot be resolved as included during bundling from pyinstaller.
+    # Dynamic Port Selection to prevent conflicts
+    port = _find_free_port()
+    url = f"http://127.0.0.1:{port}"
 
-        pyi_splash.update_text("Buch Jaaaa. Buch gut! Buch Ja!")
-        pyi_splash.close()
-    except ImportError:
-        pass
+    print(
+        r"""
+ ____             _          _       _ 
+|  _ \           | |        | |     | |
+| |_) |_   _  ___| |__      | | __ _| |
+|  _ <| | | |/ __| '_ \ _   | |/ _` | |
+| |_) | |_| | (__| | | | |__| | (_| |_|
+|____/ \__,_|\___|_| |_|\____/ \__,_(_)
+                                       
+    """
+    )
+    print(f"Buch gut! Ja! Buch sehr gut! \n")
+
+    print("#" * 50)
+    print(" CLICK HERE TO OPEN APP IN YOUR BROWSER:")
+    print(f" {url}")
+    print("#" * 50)
+    print(" CLOSING THIS WINDOW WILL NOT CLOSE THE APP.")
+    print("#" * 50)
+    print("\n")
 
     ui.run(
         title="BuchJa",
-        native=True,
+        native=False,
         reload=False,
         favicon=logo_path,
-        window_size=(1200, 1000),
+        show=True,
+        host="127.0.0.1",
+        port=port,
     )
 
 

@@ -8,12 +8,21 @@ This script handles:
 Requires: uv (https://docs.astral.sh/uv/)
 """
 
+import argparse
 import datetime
 import glob
 import os
 import shutil
 import subprocess
 import sys
+import tomllib
+
+
+def get_version() -> str:
+    """Reads the version from pyproject.toml."""
+    with open("pyproject.toml", "rb") as f:
+        data = tomllib.load(f)
+    return data["project"]["version"]
 
 
 def run_command(command: str) -> None:
@@ -27,17 +36,29 @@ def run_command(command: str) -> None:
 
 
 def main():
-    print("--- STARTING BUILD ---")
+    parser = argparse.ArgumentParser(description="Build script for BuchJa")
+    parser.add_argument(
+        "--tests",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Run tests and update coverage badge (default: True)",
+    )
+    args = parser.parse_args()
+
+    print(f"--- STARTING BUILD (Tests: {args.tests}) ---")
 
     # 1. BADGE: Update coverage badge
     #    This requires dev dependencies, so we sync them first.
-    print("\n--- STEP 1: Updating Coverage Badge ---")
-    run_command("uv sync")
-    print("Running tests... (Build will stop if tests fail)")
-    run_command("uv run python -m pytest --cov=src --cov-report=xml")
-    if not os.path.exists("badges"):
-        os.makedirs("badges")
-    run_command("uv run genbadge coverage -i coverage.xml -o badges/coverage.svg")
+    if args.tests:
+        print("\n--- STEP 1: Updating Coverage Badge ---")
+        run_command("uv sync")
+        print("Running tests... (Build will stop if tests fail)")
+        run_command("uv run python -m pytest --cov=src --cov-report=xml")
+        if not os.path.exists("badges"):
+            os.makedirs("badges")
+        run_command("uv run genbadge coverage -i coverage.xml -o badges/coverage.svg")
+    else:
+        print("\n--- STEP 1: Skipping Tests and Coverage Badge ---")
 
     # 2. CLEAN: Remove dev dependencies from environment
     #    This ensures pip-licenses only sees runtime dependencies.
@@ -213,21 +234,21 @@ THE SOFTWARE.
 
     # 6. BUILD: Create the executable using PyInstaller
     print("\n--- STEP 6: Building Windows Executable ---")
-    run_command(
-        (
-            "uv run pyinstaller "
-            '--name "BuchJa" '
-            "--onedir "
-            "--noconfirm "
-            "--windowed "  # Comment out for debugging startup issues
-            "--clean "
-            '--splash "src/materials/splash.jpeg" '
-            '--add-data "ai_config.json;." '
-            '--add-data "src/materials;materials" '
-            '--icon "src/materials/logo.png" '
-            "src/main.py"
-        )
+
+    pyinstaller_cmd = (
+        "uv run pyinstaller "
+        '--name "BuchJa" '
+        "--onedir "
+        "--noconfirm "
+        "--clean "
+        "--console "
+        '--add-data "ai_config.json;." '
+        '--add-data "src/materials;materials" '
+        '--icon "src/materials/logo.png" '
+        "src/main.py"
     )
+
+    run_command(pyinstaller_cmd)
 
     # 7. COPY LICENSE FILES: Place alongside executable
     print("\n--- STEP 7: Copying License Files to dist/ ---")
@@ -251,6 +272,15 @@ THE SOFTWARE.
     print("   ├── NOTICE.md")
     print("   ├── SECURITY.md")
     print("   └── THIRD-PARTY-LICENSES.txt")
+
+    # 9. ZIP: Archive the output
+    print("\n--- STEP 9: Zipping Output ---")
+    version = get_version()
+    zip_name = f"BuchJa_v{version}"
+
+    # Create zip in dist/ folder, containing the BuchJa folder
+    shutil.make_archive(os.path.join("dist", zip_name), "zip", "dist", "BuchJa")
+    print(f"   Created dist/{zip_name}.zip")
 
 
 if __name__ == "__main__":
