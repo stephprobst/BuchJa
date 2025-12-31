@@ -244,6 +244,8 @@ THE SOFTWARE.
         "--console "
         '--add-data "ai_config.json;." '
         '--add-data "src/materials;materials" '
+        '--add-data "src/components/image_cropper.vue;src/components" '
+        '--add-data "src/components/sketch_canvas.vue;src/components" '
         '--icon "src/materials/logo.png" '
         "src/main.py"
     )
