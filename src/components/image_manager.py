@@ -752,6 +752,11 @@ class ImageManager:
             self._container.clear()
             with self._container:
                 self._build_ui()
+        # Update folder state so the watcher doesn't trigger another refresh
+        # Lazy import to avoid circular import (app -> image_manager -> _utils -> app)
+        from src._utils import update_folder_state
+
+        update_folder_state()
 
     def get_selected_ids(self) -> list[str]:
         """Get list of selected image IDs."""

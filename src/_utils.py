@@ -165,10 +165,16 @@ def check_folder_changes() -> None:
 
         APP.last_folder_state = current_state
 
-        if APP.image_manager:
-            APP.image_manager.refresh()
-
         APP.trigger_refresh()
+
+
+def update_folder_state() -> None:
+    """Update the folder state to prevent watcher from detecting already-handled changes.
+
+    Call this after performing file operations that trigger an immediate refresh,
+    so the folder watcher doesn't trigger a second refresh when it detects the change.
+    """
+    APP.last_folder_state = get_folder_state()
 
 
 def start_folder_watcher() -> None:
