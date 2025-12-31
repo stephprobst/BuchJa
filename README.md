@@ -16,7 +16,7 @@ BuchJa is a desktop app for creating illustrated books. It uses Google's Gemini 
 
 ## Can I use this for commercial projects?
 
-The main purpose of this app is to spread joy, eg to create personalized children's books for friends and family. However, the BuchJa application is MIT licensed, so there is nothing stopping you from using it commercially. But please note, thatthe images are generated using Google's Gemini API. Please refer to Google's Terms of Service and AI Principles for information on commercial use of generated content. Also consider the implications for artists and illustrators whose work may have been used to train the underlying models.
+The main purpose of this app is to spread joy, eg to create personalized children's books for friends and family. However, the BuchJa application is MIT licensed, so there is nothing stopping you from using it commercially. But please note, that the images are generated using Google's Gemini API. Please refer to Google's Terms of Service and AI Principles for information on commercial use of generated content. Also consider the implications for artists and illustrators whose work may have been used to train the underlying models.
 
 ## Why isn't this running in the cloud?
 
