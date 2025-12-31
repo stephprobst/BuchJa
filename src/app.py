@@ -75,6 +75,11 @@ class BuchJaApp:
     def shutdown(self) -> None:
         """Shutdown the application server."""
         logger.info("Shutting down application...")
+        if self.folder_watcher_timer:
+            try:
+                self.folder_watcher_timer.cancel()
+            except Exception:
+                pass
         app.shutdown()
 
 
