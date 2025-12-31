@@ -1,5 +1,5 @@
 from pathlib import Path
-from nicegui import ui, app
+from nicegui import ui
 from src.app import APP, init_image_service
 from src._utils import start_folder_watcher
 from src.services.settings import ASPECT_RATIOS
@@ -51,30 +51,43 @@ def build_settings_tab():
             # Working Folder
             with ui.card().classes("w-full"):
                 ui.label("Working Folder").classes("text-lg font-bold")
+                ui.label(
+                    "Enter the full path to the folder where you want to store your project files."
+                ).classes("text-sm text-gray-500")
 
-                folder_label = ui.label(
-                    str(APP.settings.working_folder)
-                    if APP.settings and APP.settings.working_folder
-                    else "Not set"
-                ).classes("text-gray-600")
+                with ui.row().classes("w-full items-center gap-2"):
+                    path_input = ui.input(
+                        label="Folder Path",
+                        value=str(APP.settings.working_folder)
+                        if APP.settings and APP.settings.working_folder
+                        else "",
+                        placeholder="e.g. C:/Users/Name/Documents/MyBook",
+                    ).classes("flex-grow")
 
-                async def pick_folder():
-                    FOLDER_DIALOG = 20
-                    result = await app.native.main_window.create_file_dialog(
-                        dialog_type=FOLDER_DIALOG,
-                        allow_multiple=False,
-                    )
-                    if result:
-                        folder_path = (
-                            Path(result[0])
-                            if isinstance(result, tuple)
-                            else Path(result)
-                        )
+                    def set_folder():
+                        path_str = path_input.value
+                        if not path_str:
+                            return
+
+                        # Remove quotes if user pasted them
+                        path_str = path_str.strip('"').strip("'")
+
+                        folder_path = Path(path_str)
+
+                        if not folder_path.exists():
+                            try:
+                                folder_path.mkdir(parents=True, exist_ok=True)
+                                ui.notify(f"Created folder: {folder_path}", type="info")
+                            except Exception as e:
+                                ui.notify(
+                                    f"Could not create folder: {e}", type="negative"
+                                )
+                                return
+
                         if APP.settings is None:
                             return
                         APP.settings.working_folder = folder_path
                         APP.ensure_logging()
-                        folder_label.text = str(folder_path)
 
                         # Re-initialize services with new folder and restart folder watcher
                         init_image_service()
@@ -85,7 +98,7 @@ def build_settings_tab():
                             f"Working folder set to: {folder_path}", type="positive"
                         )
 
-                ui.button("Browse...", on_click=pick_folder).props("outline")
+                    ui.button("Set", icon="check", on_click=set_folder).props("flat")
 
             # Aspect Ratio
             with ui.card().classes("w-full"):

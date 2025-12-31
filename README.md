@@ -18,11 +18,12 @@ BuchJa is a desktop app for creating illustrated books. It uses Google's Gemini 
 
 The main purpose of this app is to spread joy, eg to create personalized children's books for friends and family. However, the BuchJa application is MIT licensed, so there is nothing stopping you from using it commercially. But please note, thatthe images are generated using Google's Gemini API. Please refer to Google's Terms of Service and AI Principles for information on commercial use of generated content. Also consider the implications for artists and illustrators whose work may have been used to train the underlying models.
 
-## Why isn't this a Web App?
+## Why isn't this running in the cloud?
 
-To give you full control over your data and API keys. Obviously you're sending data to Google's servers for image generation, but BuchJa itself doesn't store anything online. Your API keys and generated images stay on your machine and under your control.
-
-I would have created an online service, but complying with GDPR and data privacy regulations is a pain, so a desktop app it is.
+BuchJa runs as a local server on your machine and opens in your default web browser. This gives you the best of both worlds:
+*   **Privacy**: Your data and API keys stay on your machine.
+*   **Reliability**: Uses your modern browser for the best UI experience.
+*   **Control**: Full access to your local file system for saving images.
 
 ## Does this run on my system?
 
@@ -41,6 +42,7 @@ This is a _bring-your-own-key_ app. You need a Google Gemini API Key to run the 
 1.  Download the latest `BuchJa-vX.X.X.zip` from the [Releases](https://github.com/stephprobst/BuchJa/releases) page.
 2.  Unzip it.
 3.  Run `BuchJa.exe`.
+4.  A console window will open (don't close it!) and your default web browser will open the BuchJa app.
 
 > **Note for Windows Users:** You might get a warning when running the executable for the first time. This is normal for unsigned applications on Windows. The application is new and not widely used yet, so Windows Defender flags it as "Unknown". I'm currently looking into setting up a code signing certificate for future releases.
 

@@ -154,7 +154,7 @@ class Settings:
     # --- API Key Management (Secure Storage) ---
 
     def get_api_key(self) -> Optional[str]:
-        """Retrieve API key from Windows Credential Locker.
+        """Retrieve API key from System Keyring.
 
         Returns:
             The stored API key, or None if not set.
@@ -166,7 +166,7 @@ class Settings:
             return None
 
     def set_api_key(self, api_key: str) -> None:
-        """Store API key in Windows Credential Locker.
+        """Store API key in System Keyring.
 
         Args:
             api_key: The Gemini API key to store.
@@ -179,7 +179,7 @@ class Settings:
             raise
 
     def delete_api_key(self) -> None:
-        """Remove API key from Windows Credential Locker."""
+        """Remove API key from System Keyring."""
         try:
             keyring.delete_password(APP_NAME, API_KEY_SERVICE)
             logger.info("API key deleted successfully")
