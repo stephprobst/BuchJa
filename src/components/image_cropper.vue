@@ -39,7 +39,7 @@
         :src="imageSrc" 
         @load="onImageLoad"
         v-show="imageSrc"
-        style="max-width: 100%;"
+        style="max-width: 100%; max-height: 100%; display: block;"
       />
       <div v-if="!imageSrc" class="placeholder">
         Select an image to crop
@@ -54,6 +54,10 @@ export default {
     initialAspectRatio: {
       type: String,
       default: 'free'
+    },
+    uploadId: {
+      type: String,
+      required: true
     }
   },
   
@@ -70,9 +74,10 @@ export default {
   mounted() {
     this.aspectRatioOption = this.initialAspectRatio;
     this.loadCropperJs();
+    this.$emit('ready');
   },
   
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroyCropper();
   },
   
@@ -195,7 +200,7 @@ export default {
       }
     },
     
-    cropAndSave() {
+    async cropAndSave() {
       if (!this.cropper) {
         this.$emit('error', 'No cropper initialized');
         return;
@@ -211,8 +216,31 @@ export default {
         return;
       }
       
+      // Use full quality PNG - no compression needed since we're using HTTP POST
       const dataUrl = canvas.toDataURL('image/png', 1.0);
-      this.$emit('crop-complete', dataUrl);
+      
+      // Send via HTTP POST to bypass websocket payload limits
+      try {
+        const response = await fetch(`/api/crop-upload/${this.uploadId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: dataUrl,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.status !== 'ok') {
+          throw new Error(result.message || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Failed to upload cropped image:', error);
+        this.$emit('error', `Failed to save cropped image: ${error.message}`);
+      }
     },
     
     // Method callable from NiceGUI to get cropped image

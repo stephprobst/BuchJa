@@ -26,9 +26,55 @@ def build_crop_tab():
 
             # Image selection grid
             crop_source_container = ui.element("div").classes("w-full")
+
+            # Cropper section
+            ui.separator().classes("my-4")
+            current_image_label = ui.label(
+                "Select an image above to start cropping"
+            ).classes("text-sm font-medium mb-2")
             cropper_container = ui.element("div").classes("w-full mt-4")
-            cropper_instance: list[Optional[ImageCropper]] = [None]
+
             selected_source_path: list[Optional[Path]] = [None]
+
+            def on_crop(data_url: str):
+                if not APP.settings or not APP.settings.working_folder:
+                    notify_error("Working folder not configured!")
+                    return
+
+                # Save crops to references folder by default
+                ref_folder = APP.settings.get_subfolder("references")
+                if ref_folder:
+                    timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+                    crop_filename = f"crop_{timestamp}.png"
+                    crop_path = ref_folder / crop_filename
+                    save_cropped_image(data_url, crop_path)
+
+                    ui.notify(
+                        f"Cropped image saved to references: {crop_filename}",
+                        type="positive",
+                    )
+                    check_folder_changes()
+                    # Refresh grid to show new image if needed (though it goes to references)
+                    # build_crop_source_grid()
+
+            def on_error(error_msg: str):
+                notify_error(f"Crop error: {error_msg}")
+
+            # Initialize cropper once
+            with cropper_container:
+                cropper = ImageCropper(
+                    initial_aspect_ratio="free",
+                    on_crop=on_crop,
+                    on_error=on_error,
+                )
+
+            def load_image_for_cropping(image_path: Path):
+                selected_source_path[0] = image_path
+                current_image_label.text = f"Cropping: {image_path.name}"
+
+                # Load the image into cropper
+                data_url = image_to_data_url(image_path)
+                cropper.load_image(data_url)
 
             def build_crop_source_grid():
                 crop_source_container.clear()
@@ -106,54 +152,9 @@ def build_crop_tab():
                                         )
 
                                         def select_for_crop(card=card, path=full_path):
-                                            selected_source_path[0] = path
                                             load_image_for_cropping(path)
 
                                         card.on("click", select_for_crop)
-
-            def load_image_for_cropping(image_path: Path):
-                cropper_container.clear()
-                with cropper_container:
-                    ui.label(f"Cropping: {image_path.name}").classes(
-                        "text-sm font-medium mb-2"
-                    )
-
-                    def on_crop(data_url: str):
-                        if not APP.settings or not APP.settings.working_folder:
-                            notify_error("Working folder not configured!")
-                            return
-
-                        # Save crops to references folder by default
-                        ref_folder = APP.settings.get_subfolder("references")
-                        if ref_folder:
-                            timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-                            crop_filename = f"crop_{timestamp}.png"
-                            crop_path = ref_folder / crop_filename
-                            save_cropped_image(data_url, crop_path)
-
-                            # if APP.project_manager:
-                            #     APP.project_manager.add_image(crop_path, 'references', crop_path.stem)
-
-                            ui.notify(
-                                f"Cropped image saved to references: {crop_filename}",
-                                type="positive",
-                            )
-                            check_folder_changes()
-                            build_crop_source_grid()  # Refresh to show new image
-
-                    def on_error(error_msg: str):
-                        notify_error(f"Crop error: {error_msg}")
-
-                    cropper = ImageCropper(
-                        initial_aspect_ratio="free",
-                        on_crop=on_crop,
-                        on_error=on_error,
-                    )
-                    cropper_instance[0] = cropper
-
-                    # Load the image into cropper
-                    data_url = image_to_data_url(image_path)
-                    ui.timer(0.5, lambda: cropper.load_image(data_url), once=True)
 
             # Initial build
             build_crop_source_grid()

@@ -76,6 +76,13 @@ export default {
   
   mounted() {
     this.initCanvas();
+    this.$emit('ready');
+  },
+  
+  beforeUnmount() {
+    if (this.canvas) {
+      this.canvas.dispose();
+    }
   },
   
   methods: {

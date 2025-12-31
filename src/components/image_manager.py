@@ -500,9 +500,10 @@ class ImageManager:
 
             # Line 1: Name
             with ui.row().classes("w-full justify-center px-2 pt-2"):
-                ui.label(image_name).classes(
+                with ui.label(image_name).classes(
                     "text-sm truncate w-full text-center"
-                ).tooltip(image_name)
+                ):
+                    ui.tooltip(image_name)
 
             # Line 2: Navigation (Pages only)
             if category == "pages":
@@ -554,9 +555,10 @@ class ImageManager:
                     except StopIteration:
                         ui.notify("Image no longer exists", type="warning")
 
-                ui.button(icon="visibility", on_click=view_image).props(
+                with ui.button(icon="visibility", on_click=view_image).props(
                     "flat dense round size=sm"
-                ).tooltip("View")
+                ):
+                    ui.tooltip("View")
 
                 # Edit in Photos (Windows only)
                 if platform.system() == "Windows":
@@ -589,26 +591,27 @@ class ImageManager:
                                 f"Could not open for editing: {e}", type="negative"
                             )
 
-                    ui.button(icon="photo_camera", on_click=edit_in_photos).props(
+                    with ui.button(icon="photo_camera", on_click=edit_in_photos).props(
                         "flat dense round size=sm"
-                    ).tooltip(
-                        "Edit in Photos (e.g. for background removal or removing individual objects)"
-                    )
+                    ):
+                        ui.tooltip(
+                            "Edit in Photos (e.g. for background removal or removing individual objects)"
+                        )
 
                 # Rename
                 def rename(iid=image_id, current_name=image_name):
                     self._show_rename_dialog(iid, current_name)
 
-                ui.button(icon="edit", on_click=rename).props(
+                with ui.button(icon="edit", on_click=rename).props(
                     "flat dense round size=sm"
-                ).tooltip("Rename")
+                ):
+                    ui.tooltip("Rename")
 
                 # Move to different category
-                with (
-                    ui.button(icon="drive_file_move")
-                    .props("flat dense round size=sm")
-                    .tooltip("Move")
+                with ui.button(icon="drive_file_move").props(
+                    "flat dense round size=sm"
                 ):
+                    ui.tooltip("Move")
                     with ui.menu():
                         for cat in ["pages", "references", "inputs"]:
                             if cat != category:
@@ -626,9 +629,10 @@ class ImageManager:
                     ui.notify("Image removed")
                     self.refresh()
 
-                ui.button(icon="delete", on_click=delete).props(
+                with ui.button(icon="delete", on_click=delete).props(
                     "flat dense round size=sm color=negative"
-                ).tooltip("Delete")
+                ):
+                    ui.tooltip("Delete")
 
     def _create_preview_dialog(self) -> None:
         """Create the persistent preview dialog."""

@@ -25,6 +25,7 @@ class SketchCanvas(Element, component="sketch_canvas.vue"):
         height: int = 600,
         background_color: str = "#ffffff",
         on_save: Optional[Callable[[str], None]] = None,
+        on_ready: Optional[Callable[[], None]] = None,
     ):
         """Initialize the sketch canvas.
 
@@ -33,6 +34,7 @@ class SketchCanvas(Element, component="sketch_canvas.vue"):
             height: Canvas height in pixels.
             background_color: Background color (hex string).
             on_save: Callback function when save button is clicked, receives base64 data URL.
+            on_ready: Callback when the component is mounted and ready.
         """
         super().__init__()
         self._props["width"] = width
@@ -41,6 +43,8 @@ class SketchCanvas(Element, component="sketch_canvas.vue"):
 
         if on_save:
             self.on("save", lambda e: on_save(e.args))
+        if on_ready:
+            self.on("ready", lambda _: on_ready())
 
     def clear(self) -> None:
         """Clear the canvas."""

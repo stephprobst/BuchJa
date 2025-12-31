@@ -5,12 +5,54 @@ Provides an image cropping interface using Cropper.js integrated as a Vue compon
 
 import base64
 import logging
+import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from fastapi import Request
+from nicegui import app, background_tasks, Client
 from nicegui.element import Element
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class _CropCallbackInfo:
+    """Stores callback and client context for crop operations."""
+
+    callback: Callable[[str], None]
+    client: Client
+
+
+# Store for pending crop callbacks, keyed by upload_id
+_crop_callbacks: dict[str, _CropCallbackInfo] = {}
+
+
+@app.post("/api/crop-upload/{upload_id}")
+async def crop_upload_endpoint(upload_id: str, request: Request):
+    """Receive cropped image data via HTTP POST to bypass websocket size limits."""
+    try:
+        body = await request.body()
+        data_url = body.decode("utf-8")
+
+        if upload_id in _crop_callbacks:
+            # Don't pop - keep the callback registered for reuse
+            info = _crop_callbacks[upload_id]
+
+            # Run the callback in the correct client context
+            async def run_callback():
+                with info.client:
+                    info.callback(data_url)
+
+            background_tasks.create(run_callback())
+            return {"status": "ok"}
+        else:
+            logger.warning(f"No callback found for upload_id: {upload_id}")
+            return {"status": "error", "message": "No callback registered"}
+    except Exception as e:
+        logger.error(f"Error processing crop upload: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 class ImageCropper(Element, component="image_cropper.vue"):
@@ -24,6 +66,7 @@ class ImageCropper(Element, component="image_cropper.vue"):
         initial_aspect_ratio: str = "free",
         on_crop: Optional[Callable[[str | dict], None]] = None,
         on_error: Optional[Callable[[str | dict], None]] = None,
+        on_ready: Optional[Callable[[], None]] = None,
     ):
         """Initialize the image cropper.
 
@@ -31,9 +74,21 @@ class ImageCropper(Element, component="image_cropper.vue"):
             initial_aspect_ratio: Initial aspect ratio ('free', '1:1', '3:4', '4:3', '9:16', '16:9').
             on_crop: Callback when crop button is clicked, receives base64 data URL.
             on_error: Callback when an error occurs, receives error message.
+            on_ready: Callback when the component is mounted and ready.
         """
         super().__init__()
         self._props["initialAspectRatio"] = initial_aspect_ratio
+
+        # Generate a unique upload ID for this cropper instance
+        self._upload_id = str(uuid.uuid4())
+        self._props["uploadId"] = self._upload_id
+
+        # Register the crop callback for HTTP upload with client context
+        if on_crop:
+            _crop_callbacks[self._upload_id] = _CropCallbackInfo(
+                callback=on_crop,
+                client=self.client,
+            )
 
         def _unwrap_nicegui_event_args(args: Any) -> Any:
             # NiceGUI forwards Vue emits via a browser CustomEvent.
@@ -45,12 +100,17 @@ class ImageCropper(Element, component="image_cropper.vue"):
                 return detail
             return args
 
-        if on_crop:
-            self.on(
-                "crop-complete", lambda e: on_crop(_unwrap_nicegui_event_args(e.args))
-            )
         if on_error:
             self.on("error", lambda e: on_error(_unwrap_nicegui_event_args(e.args)))
+        if on_ready:
+            self.on("ready", lambda _: on_ready())
+
+    def _handle_unmount(self):
+        """Clean up callback when component is unmounted."""
+        if self._upload_id in _crop_callbacks:
+            del _crop_callbacks[self._upload_id]
+        if hasattr(super(), "_handle_unmount"):
+            super()._handle_unmount()
 
     def load_image(self, src: str) -> None:
         """Load an image into the cropper.
