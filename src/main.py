@@ -253,6 +253,28 @@ def main():
 
     # Dynamic Port Selection to prevent conflicts
     port = _find_free_port()
+    url = f"http://127.0.0.1:{port}"
+
+    print(
+        r"""
+ ____             _          _       _ 
+|  _ \           | |        | |     | |
+| |_) |_   _  ___| |__      | | __ _| |
+|  _ <| | | |/ __| '_ \ _   | |/ _` | |
+| |_) | |_| | (__| | | | |__| | (_| |_|
+|____/ \__,_|\___|_| |_|\____/ \__,_(_)
+                                       
+    """
+    )
+    print(f"Buch gut! Ja! Buch sehr gut! \n")
+
+    print("#" * 50)
+    print(" CLICK HERE TO OPEN APP IN YOUR BROWSER:")
+    print(f" {url}")
+    print("#" * 50)
+    print(" CLOSING THIS WINDOW WILL NOT CLOSE THE APP.")
+    print("#" * 50)
+    print("\n")
 
     ui.run(
         title="BuchJa",
