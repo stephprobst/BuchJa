@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "BuchJa"
-version = "0.1.2"
+version = "0.1.1"
 description = "Create illustrated books with AI image generation"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"

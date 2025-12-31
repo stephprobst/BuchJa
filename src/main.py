@@ -11,69 +11,6 @@ if sys.stderr is None:
     sys.stderr = open(os.devnull, "w")
 
 
-def check_dependencies():
-    """Checks for required system dependencies (Visual C++ Redistributable)."""
-    if os.name != "nt":
-        return
-
-    import ctypes
-    import winreg
-    import webbrowser
-
-    try:
-        # Check for Visual C++ 2015-2022 Redistributable
-        is_64bits = sys.maxsize > 2**32
-        arch = "x64" if is_64bits else "x86"
-        key_path = f"SOFTWARE\\Microsoft\\VisualStudio\\14.0\\VC\\Runtimes\\{arch}"
-
-        try:
-            with winreg.OpenKey(
-                winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_READ
-            ) as key:
-                installed, _ = winreg.QueryValueEx(key, "Installed")
-                if installed == 1:
-                    return
-        except OSError:
-            pass  # Key not found
-
-        # If we get here, the registry key was missing or Installed != 1
-        MB_ICONERROR = 0x10
-        MB_YESNO = 0x04
-        IDYES = 6
-
-        title = "Missing System Component"
-        message = (
-            "The Microsoft Visual C++ Redistributable is missing.\n"
-            "This component is required for BuchJa to run.\n\n"
-            "Click 'Yes' to open the official Microsoft download page.\n"
-            "Please download and install the 'x64' version manually to continue."
-        )
-
-        # Show native message box
-        result = ctypes.windll.user32.MessageBoxW(
-            0, message, title, MB_ICONERROR | MB_YESNO
-        )
-
-        if result == IDYES:
-            # Open Microsoft's download page
-            webbrowser.open(
-                "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170"
-            )
-
-        sys.exit(1)
-
-    except Exception as e:
-        # If checking fails, log it but try to continue
-        # Note: stderr might be redirected to devnull above
-        try:
-            print(f"Dependency check failed: {e}", file=sys.stderr)
-        except:
-            pass
-
-
-check_dependencies()
-
-
 import logging
 import socket
 from nicegui import ui

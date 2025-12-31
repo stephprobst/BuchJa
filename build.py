@@ -219,7 +219,7 @@ THE SOFTWARE.
             '--name "BuchJa" '
             "--onedir "
             "--noconfirm "
-            # "--windowed "  # Comment out for debugging startup issues
+            "--windowed "  # Comment out for debugging startup issues
             "--clean "
             '--splash "src/materials/splash.jpeg" '
             '--add-data "ai_config.json;." '
@@ -231,8 +231,6 @@ THE SOFTWARE.
             "--hidden-import=win32com "
             "--hidden-import=webview "
             "--collect-all=webview "
-            "--collect-all=pythonnet "
-            "--collect-all=clr_loader "
             "src/main.py"
         )
     )
