@@ -2,6 +2,7 @@
 
 import logging
 import asyncio
+import socket
 from nicegui import ui
 from pathlib import Path
 from src.app import APP, init_services, init_image_service
@@ -239,8 +240,19 @@ def main_page():
     APP.status_footer = StatusFooter()
 
 
+def _find_free_port() -> int:
+    """Find a free port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
 def main():
     """Application entry point."""
+
+    # Dynamic Port Selection to prevent conflicts
+    port = _find_free_port()
 
     ui.run(
         title="BuchJa",
@@ -248,6 +260,8 @@ def main():
         reload=False,
         favicon=logo_path,
         show=True,
+        host="127.0.0.1",
+        port=port,
     )
 
 
