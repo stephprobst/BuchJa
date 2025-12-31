@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Optional, Any, Callable
-from nicegui import ui
+from nicegui import ui, app
 from src.services.settings import Settings
 from src.services.image_service import ImageService
 from src.components.image_manager import ImageManager, ProjectManager
@@ -71,6 +71,11 @@ class BuchJaApp:
         if self.settings is not None and self.settings.working_folder is not None:
             project_folder = self.settings.working_folder
         self.log_file = configure_logging(project_folder=project_folder)
+
+    def shutdown(self) -> None:
+        """Shutdown the application server."""
+        logger.info("Shutting down application...")
+        app.shutdown()
 
 
 APP = BuchJaApp()

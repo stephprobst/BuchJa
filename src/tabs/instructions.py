@@ -29,7 +29,7 @@ def build_instructions_tab():
             ui.label("1. Setup").classes("text-xl font-bold mb-2")
             ui.markdown("""
             - Go to the **Settings** tab.
-            - Enter your **Gemini API Key**. This is securely stored in the Windows Credential Manager.
+            - Enter your **Gemini API Key**. This is securely stored in the System Keyring.
             - Select a **Working Folder** for your project files and generated images.
             - Choose an **Aspect Ratio** for book pages (and optionally a different one for character sheets).
             - Enter a **Style Prompt** to define the artistic style.
@@ -88,5 +88,5 @@ def build_instructions_tab():
             - Use the **Export** tab to create a PDF, or copy images directly from the working folder for use in other layout software.       
             """).classes("text-gray-700")
             tip(
-                "On Windows, you can also open images in the Windows Photo app and edit them there further, e.g. by removing individual objects using the new AI features. This can sometimes work better than regenerating the entire image."
+                "You can also open images in an external image editor and edit them there further, e.g. by removing individual objects. This can sometimes work better than regenerating the entire image."
             )

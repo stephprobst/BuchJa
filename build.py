@@ -219,9 +219,7 @@ THE SOFTWARE.
             '--name "BuchJa" '
             "--onedir "
             "--noconfirm "
-            "--windowed "  # Comment out for debugging startup issues
             "--clean "
-            '--splash "src/materials/splash.jpeg" '
             '--add-data "ai_config.json;." '
             '--add-data "src/materials;materials" '
             '--icon "src/materials/logo.png" '
