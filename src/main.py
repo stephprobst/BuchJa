@@ -12,7 +12,6 @@ if sys.stderr is None:
 
 
 import logging
-import socket
 from nicegui import ui
 from nicegui import app
 from pathlib import Path
@@ -223,56 +222,8 @@ def main_page():
     APP.status_footer = StatusFooter()
 
 
-def _check_webview2_available() -> bool:
-    """Check if Microsoft Edge WebView2 Runtime is available on Windows."""
-    if sys.platform != "win32":
-        return True
-
-    try:
-        import winreg
-
-        # GUID for WebView2 Runtime
-        webview2_key = r"SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
-        webview2_key_64 = r"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
-
-        paths_to_check = [
-            (winreg.HKEY_LOCAL_MACHINE, webview2_key_64),
-            (winreg.HKEY_LOCAL_MACHINE, webview2_key),
-            (winreg.HKEY_CURRENT_USER, webview2_key),
-        ]
-
-        for hkey, path in paths_to_check:
-            try:
-                with winreg.OpenKey(hkey, path) as key:
-                    # Read the 'pv' (Product Version) value
-                    version, _ = winreg.QueryValueEx(key, "pv")
-                    # Version must be present and not 0.0.0.0
-                    if version and version != "0.0.0.0":
-                        return True
-            except FileNotFoundError:
-                continue
-
-        return False
-    except Exception:
-        # If we can't check, assume it's available
-        return True
-
-
-def _find_free_port() -> int:
-    """Find a free port on localhost."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
-
-
 def main():
     """Application entry point."""
-
-    # Prevent infinite spawning in multiprocessing environments (crucial for PyInstaller)
-    import multiprocessing
-
-    multiprocessing.freeze_support()
 
     try:
         import pyi_splash  # Cannot be resolved as included during bundling from pyinstaller.
@@ -282,22 +233,12 @@ def main():
     except ImportError:
         pass
 
-    # Check if WebView2 is available for native mode
-    native_mode = True
-    if getattr(sys, "frozen", False) and not _check_webview2_available():
-        logger.warning("WebView2 Runtime not found, falling back to browser mode")
-        native_mode = False
-
-    # Dynamic Port Selection to prevent conflicts
-    port = _find_free_port()
-
     ui.run(
         title="BuchJa",
-        native=native_mode,
+        native=True,
         reload=False,
         favicon=logo_path,
         window_size=(1200, 1000),
-        port=port,
     )
 
 
