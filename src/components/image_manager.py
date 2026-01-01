@@ -341,6 +341,8 @@ class ImageManager:
 
         with ui.column().classes("w-full gap-4") as self._container:
             self._build_ui()
+            # Create preview dialog during initialization to ensure proper UI context
+            self._create_preview_dialog()
 
     def _get_thumbnail_path(self, image_path: str) -> Path:
         """Get thumbnail path for an image."""
